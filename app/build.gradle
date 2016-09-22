@@ -1,3 +1,5 @@
+import org.gradle.internal.os.OperatingSystem;
+
 apply plugin: 'com.android.application'
 
 android {
@@ -16,6 +18,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            jniDebuggable true
+        }
     }
 }
 
@@ -27,4 +32,195 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.android.support:design:24.2.1'
     testCompile 'junit:junit:4.12'
+}
+
+
+// native cmaked part
+
+def String buildConfig = android.defaultPublishConfig.substring(0, 1).toUpperCase() +
+        android.defaultPublishConfig.substring(1, android.defaultPublishConfig.length())
+
+android {
+    // drop mips for now "mips", , "mips64"
+//    def cmAndroidAbis = ["armeabi", "armeabi-v7a", "x86", "arm64-v8a", "x86_64"]
+    def cmAndroidAbis = ["armeabi-v7a"] // TODO:
+    def String abiFiltersString = cmAndroidAbis.toString()
+    abiFiltersString = abiFiltersString.substring(1, abiFiltersString.length() - 1)
+
+//    defaultPublishConfig "debug" // uncomment it for the debug of the native code
+
+    defaultConfig {
+        externalNativeBuild {
+            cmake {
+                abiFilters "${abiFiltersString}"
+
+//                targets "ngstore", "ngstoreapi", "ngsandroid" // TODO:
+
+                arguments "-DSUPRESS_VERBOSE_OUTPUT=OFF",
+//                        "-DCMAKE_VERBOSE_MAKEFILE=TRUE",
+//                        "-DSKIP_GIT_PULL=TRUE",
+//                        "-DSTRIP_NGS_LIBS=TRUE",
+
+                        "-DANDROID_PLATFORM=android-9", // ${getNdkPlatformLevel(abi)} // TODO:
+                        "-DANDROID_TOOLCHAIN=gcc",
+//                        "-DANDROID_TOOLCHAIN=clang",
+                        "-DANDROID_STL=gnustl_static",
+//                        "-DANDROID_STL=c++_static",
+                        "-DANDROID_CPP_FEATURES=rtti exceptions",
+//                        "-DCMAKE_TOOLCHAIN_FILE=${projectDir}/libngsandroid/cmake/android.toolchain.cmake",
+                        "-GAndroid Gradle - Unix Makefiles",
+                        "-DCMAKE_MAKE_PROGRAM=make",
+                        "-DBUILD_SHARED_LIBS=ON",
+
+                        "-DBUILD_TARGET_PLATFORM=ANDROID"
+
+//                        "-DCXX_STANDARD=14",
+//                        "-DCXX_STANDARD_REQUIRED=ON",
+
+//                        "-DCMAKE_BUILD_TYPE=Release" // let's always release ${buildTypeName}
+            }
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "${rootDir}/libngsandroid/CMakeLists.txt"
+        }
+    }
+
+    def String genSrcJavaDir = "${projectDir}/.externalNativeBuild/cmake/${defaultPublishConfig}" +
+            "/${cmAndroidAbis.get(0)}/libngstoreapi/libngstore/bindings"
+
+    task cmCopyJSources(type: Copy) {
+        description "Copy java files."
+
+        from(new File(genSrcJavaDir)) { include "*.java" }
+        into new File("src/main/java/com/nextgis/store/bindings")
+    }
+
+    task cmMoveJSources(type: Delete, dependsOn: cmCopyJSources) {
+        delete fileTree(new File(genSrcJavaDir)) { include "*.java" }
+    }
+
+    cmMoveJSources.dependsOn {
+        // TODO: set from buildType
+        // externalNativeBuildDebug is before externalNativeBuildRelease
+        // if externalNativeBuildDebug is enabled then externalNativeBuildDebug else externalNativeBuildRelease
+        tasks.findAll { task -> task.name.equals("externalNativeBuildDebug") }
+    }
+
+// TODO:
+//    androidAbis.each { androidAbi ->
+//        task "cleanNative-${androidAbi}"(type: Exec) {
+//            workingDir getWorkDir(androidAbi)
+//            def cmakeCmd = "cmake --build . --target clean"
+//            commandLine getShell(), getShellArg(), "${cmakeCmd}"
+//        }
+//    }
+//    clean.dependsOn androidAbis.collect { androidAbi -> "cleanNative-${androidAbi}" }
+}
+
+def String dependedTask = "compile${buildConfig}JavaWithJavac"
+
+tasks.all {
+    task ->
+        if (task.name.equals(dependedTask)) {
+            task.dependsOn cmMoveJSources
+        }
+}
+
+
+def getNdkPlatformLevel(abi)
+{
+    def platform32 = 9
+    def platform64 = 21
+
+    switch (abi) {
+        case "armeabi":
+            return platform32
+        case "armeabi-v7a":
+            return platform32
+        case "x86":
+            return platform32
+        case "mips":
+            return platform32
+        default:
+            return platform32
+
+        case "arm64-v8a":
+            return platform64
+        case "x86_64":
+            return platform64
+        case "mips64":
+            return platform64
+    }
+}
+
+
+def getSdkDir()
+{
+    if (System.env.ANDROID_HOME != null) {
+        return System.env.ANDROID_HOME
+    }
+
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file("local.properties").newDataInputStream())
+    def sdkdir = properties.getProperty("sdk.dir", null)
+    if (sdkdir == null) {
+        throw new GradleException("""\
+                SDK location not found.
+                Define location with sdk.dir in the local.properties file
+                or with an ANDROID_HOME environment variable.""")
+    }
+
+    return sdkdir
+}
+
+
+def getNdkDir()
+{
+    if (System.env.ANDROID_NDK_ROOT != null) {
+        return System.env.ANDROID_NDK_ROOT
+    }
+
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file("local.properties").newDataInputStream())
+    def ndkdir = properties.getProperty("ndk.dir", null)
+    if (ndkdir == null) {
+        throw new GradleException("""\
+                NDK location not found.
+                Define location with ndk.dir in the local.properties file
+                or with an ANDROID_NDK_ROOT environment variable.""")
+    }
+
+    return ndkdir
+}
+
+
+def getNdkBuildCmd()
+{
+    def ndkbuild = getNdkDir() + "/ndk-build"
+    if (OperatingSystem.current().isWindows()) {
+        ndkbuild += ".cmd"
+    }
+    return ndkbuild
+}
+
+
+def getShell()
+{
+    if (OperatingSystem.current().isWindows()) {
+        return "cmd"
+    } else {
+        return "sh"
+    }
+}
+
+
+def getShellArg()
+{
+    if (OperatingSystem.current().isWindows()) {
+        return "/c"
+    } else {
+        return "-c"
+    }
 }

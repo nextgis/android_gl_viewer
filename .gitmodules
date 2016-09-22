@@ -1,5 +1,5 @@
 [submodule "nextgis_datastore"]
-	path = nextgis_datastore
+	path = libngstore
 	url = https://github.com/nextgis/nextgis_datastore.git
 [submodule "libngsandroid"]
 	path = libngsandroid

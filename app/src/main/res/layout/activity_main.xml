@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/fab_margin"
             android:layout_width="wrap_content"
-            app:srcCompat="@android:drawable/ic_dialog_email"
+            app:srcCompat="@drawable/ic_action_refresh_dark"
             />
 
 </android.support.design.widget.CoordinatorLayout>

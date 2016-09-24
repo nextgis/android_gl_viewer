@@ -1,4 +1,4 @@
-package com.nextgis.androidglviewer;
+package com.nextgis.glviewer;
 
 import org.junit.Test;
 

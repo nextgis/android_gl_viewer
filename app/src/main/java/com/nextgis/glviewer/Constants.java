@@ -1,4 +1,4 @@
-package com.nextgis.androidglviewer;
+package com.nextgis.glviewer;
 
 public interface Constants
 {

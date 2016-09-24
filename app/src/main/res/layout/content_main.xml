@@ -4,6 +4,6 @@
         android:id="@+id/fragment"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:name="com.nextgis.androidglviewer.MapFragment"
+        android:name="com.nextgis.glviewer.MapFragment"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         />

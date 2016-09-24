@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
         xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.nextgis.androidglviewer"
+        package="com.nextgis.glviewer"
         >
 
     <uses-feature
@@ -47,7 +47,7 @@
 
         <activity
                 android:label="@string/app_name"
-                android:name=".MainActivity"
+                android:name="com.nextgis.glviewer.MainActivity"
                 android:theme="@style/AppTheme.NoActionBar"
                 >
             <intent-filter>

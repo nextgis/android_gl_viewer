@@ -1,4 +1,4 @@
-package com.nextgis.androidglviewer;
+package com.nextgis.glviewer;
 
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;

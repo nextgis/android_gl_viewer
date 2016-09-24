@@ -73,6 +73,7 @@ android {
                         "-DCMAKE_MAKE_PROGRAM=make",
                         "-DBUILD_SHARED_LIBS=ON",
 
+                        "-DANDROID_STUDIO_CMAKE=ON",
                         "-DBUILD_TARGET_PLATFORM=ANDROID"
 
 //                        "-DCXX_STANDARD=14",

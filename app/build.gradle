@@ -36,6 +36,9 @@ dependencies {
 
 
 // native cmaked part
+android {
+//    defaultPublishConfig "debug" // uncomment it for the debug of the native code
+}
 
 def String buildConfig = android.defaultPublishConfig.substring(0, 1).toUpperCase() +
         android.defaultPublishConfig.substring(1, android.defaultPublishConfig.length())
@@ -46,8 +49,6 @@ android {
     def cmAndroidAbis = ["armeabi-v7a"] // TODO:
     def String abiFiltersString = cmAndroidAbis.toString()
     abiFiltersString = abiFiltersString.substring(1, abiFiltersString.length() - 1)
-
-//    defaultPublishConfig "debug" // uncomment it for the debug of the native code
 
     defaultConfig {
         externalNativeBuild {

@@ -93,7 +93,9 @@ public class DataStore
         String filenameArray[] = sceneFile.getName().split("\\.");
         String sceneFileName = filenameArray[0];
 
-        if (Api.ngsDataStoreLoad(sceneFileName, sceneFilePath, "", false, 1, mLoadCallback) == 0) {
+        String[] options = {"LOAD_OP=COPY", "FEATURES_SKIP=EMPTY_GEOMETRY"};
+
+        if (Api.ngsDataStoreLoad(sceneFileName, sceneFilePath, "", options, mLoadCallback) == 0) {
             Log.d(Constants.TAG, "Error: Load scene failed");
         }
     }

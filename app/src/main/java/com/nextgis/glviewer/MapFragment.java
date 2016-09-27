@@ -7,13 +7,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import com.nextgis.store.map.MapGlView;
 
 
 public class MapFragment
         extends Fragment
 {
     protected MainActivity   mActivity;
-    protected GlMapView      mMapView;
+    protected MapGlView      mMapGlView;
     protected RelativeLayout mMapRelativeLayout;
 
 
@@ -24,8 +25,8 @@ public class MapFragment
 
         mActivity = (MainActivity) getActivity();
 
-        mMapView = new GlMapView(mActivity);
-        mMapView.setId(R.id.gl_map_view);
+        mMapGlView = new MapGlView(mActivity);
+        mMapGlView.setId(R.id.gl_map_view);
     }
 
 
@@ -40,11 +41,11 @@ public class MapFragment
         mMapRelativeLayout = (RelativeLayout) view.findViewById(R.id.rl_map);
 
         if (mMapRelativeLayout != null) {
-            mMapRelativeLayout.addView(mMapView, 0, new RelativeLayout.LayoutParams(
+            mMapRelativeLayout.addView(mMapGlView, 0, new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
                     RelativeLayout.LayoutParams.MATCH_PARENT));
         }
-        mMapView.invalidate();
+        mMapGlView.invalidate();
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.reload_map);
         fab.setOnClickListener(new View.OnClickListener()
@@ -63,9 +64,9 @@ public class MapFragment
     @Override
     public void onDestroyView()
     {
-        if (mMapView != null) {
+        if (mMapGlView != null) {
             if (mMapRelativeLayout != null) {
-                mMapRelativeLayout.removeView(mMapView);
+                mMapRelativeLayout.removeView(mMapGlView);
             }
         }
 
@@ -76,7 +77,7 @@ public class MapFragment
     @Override
     public void onPause()
     {
-        mMapView.onPause();
+        mMapGlView.onPause();
         super.onPause();
     }
 
@@ -85,6 +86,6 @@ public class MapFragment
     public void onResume()
     {
         super.onResume();
-        mMapView.onResume();
+        mMapGlView.onResume();
     }
 }

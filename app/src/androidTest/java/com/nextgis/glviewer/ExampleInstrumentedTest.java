@@ -25,6 +25,6 @@ public class ExampleInstrumentedTest
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.nextgis.androidglviewer", appContext.getPackageName());
+        assertEquals("com.nextgis.glviewer", appContext.getPackageName());
     }
 }

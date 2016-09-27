@@ -1,10 +1,12 @@
-package com.nextgis.glviewer;
+package com.nextgis.store.map;
 
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
+import com.nextgis.glviewer.Constants;
+import com.nextgis.glviewer.SettingConstants;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -12,22 +14,63 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL10;
+import java.io.File;
 
 
-public class GlMapView
+public class MapGlView
         extends GLSurfaceView
+        implements MapDrawing.OnMapDrawListener,
+                   MapDrawing.OnRequestMapDrawListener
 {
+    // EGL14.EGL_CONTEXT_CLIENT_VERSION
+    protected static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
+    protected static final int EGL_OPENGL_ES2_BIT         = 4;
+
+    protected static int[] glConfigAttribs = {
+            EGL10.EGL_RENDERABLE_TYPE,
+            EGL_OPENGL_ES2_BIT,
+            EGL10.EGL_RED_SIZE,
+            8,
+            EGL10.EGL_GREEN_SIZE,
+            8,
+            EGL10.EGL_BLUE_SIZE,
+            8,
+            EGL10.EGL_NONE};
+
     protected static final boolean DEBUG = false;
 
+    protected EGL10     mEgl;
+    protected EGLConfig mEglConfig;
 
-    public GlMapView(Context context)
+    protected EGLDisplay mEglDisplay;
+    protected EGLSurface mEglSurface;
+    protected EGLContext mEglContext;
+
+    protected MapDrawing mMapDrawing;
+
+    protected long mDrawTime;
+
+
+    // TODO: to MainApplication
+    protected String getMapPath()
+    {
+        Context context = getContext();
+        File defaultPath = getContext().getExternalFilesDir(SettingConstants.KEY_PREF_MAP);
+        if (defaultPath == null) {
+            defaultPath = new File(context.getFilesDir(), SettingConstants.KEY_PREF_MAP);
+        }
+        return defaultPath.getPath();
+    }
+
+
+    public MapGlView(Context context)
     {
         super(context);
         init();
     }
 
 
-    public GlMapView(
+    public MapGlView(
             Context context,
             AttributeSet attrs)
     {
@@ -42,15 +85,23 @@ public class GlMapView
 //        setEGLContextClientVersion(2);
 
         setEGLConfigChooser(new ConfigChooser(8, 8, 8, 0, 0, 0));
-//        setEGLWindowSurfaceFactory(new SurfaceFactory());
         setEGLContextFactory(new ContextFactory());
+        setEGLWindowSurfaceFactory(new SurfaceFactory());
 
         setRenderer(new MapRenderer());
-//        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY); // update with requestRender()
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY); // update with requestRender()
+
+        mMapDrawing = new MapDrawing(getMapPath());
+        mMapDrawing.setOnMapDrawListener(this);
+        mMapDrawing.setOnRequestMapDrawListener(this);
+
+        mMapDrawing.createMap();
+//        mMapDrawing.loadMap();
+        mMapDrawing.openMap();
     }
 
 
-    protected static void checkEglError(
+    protected void checkEglError(
             String prompt,
             EGL10 egl)
     {
@@ -61,21 +112,9 @@ public class GlMapView
     }
 
 
-    protected static class ConfigChooser
+    protected class ConfigChooser
             implements GLSurfaceView.EGLConfigChooser
     {
-        protected static int   EGL_OPENGL_ES2_BIT = 4;
-        protected static int[] s_configAttribs2   = {
-                EGL10.EGL_RENDERABLE_TYPE,
-                EGL_OPENGL_ES2_BIT,
-                EGL10.EGL_RED_SIZE,
-                8,
-                EGL10.EGL_GREEN_SIZE,
-                8,
-                EGL10.EGL_BLUE_SIZE,
-                8,
-                EGL10.EGL_NONE};
-
         // Subclasses can adjust these values:
         protected int mRedSize;
         protected int mGreenSize;
@@ -103,15 +142,17 @@ public class GlMapView
         }
 
 
+        @Override
         public EGLConfig chooseConfig(
                 EGL10 egl,
                 EGLDisplay display)
         {
+            mEgl = egl;
+            mEglDisplay = display;
 
-            /* Get the number of minimally matching EGL configurations
-             */
+            // Get the number of minimally matching EGL configurations
             int[] num_config = new int[1];
-            egl.eglChooseConfig(display, s_configAttribs2, null, 0, num_config);
+            egl.eglChooseConfig(display, glConfigAttribs, null, 0, num_config);
 
             int numConfigs = num_config[0];
 
@@ -119,17 +160,17 @@ public class GlMapView
                 throw new IllegalArgumentException("No configs match configSpec");
             }
 
-            /* Allocate then read the array of minimally matching EGL configs
-             */
+            // Allocate then read the array of minimally matching EGL configs
             EGLConfig[] configs = new EGLConfig[numConfigs];
-            egl.eglChooseConfig(display, s_configAttribs2, configs, numConfigs, num_config);
+            egl.eglChooseConfig(display, glConfigAttribs, configs, numConfigs, num_config);
 
             if (DEBUG) {
                 printConfigs(egl, display, configs);
             }
-            /* Now return the "best" one
-             */
-            return chooseConfig(egl, display, configs);
+
+            // Now return the "best" one
+            mEglConfig = chooseConfig(egl, display, configs);
+            return mEglConfig;
         }
 
 
@@ -282,39 +323,10 @@ public class GlMapView
     }
 
 
-    protected static class SurfaceFactory
-            implements GLSurfaceView.EGLWindowSurfaceFactory
-    {
-
-        @Override
-        public EGLSurface createWindowSurface(
-                EGL10 egl,
-                EGLDisplay display,
-                EGLConfig config,
-                Object nativeWindow)
-        {
-            return null;
-        }
-
-
-        @Override
-        public void destroySurface(
-                EGL10 egl,
-                EGLDisplay display,
-                EGLSurface surface)
-        {
-
-        }
-    }
-
-
-    protected static class ContextFactory
+    protected class ContextFactory
             implements GLSurfaceView.EGLContextFactory
     {
-        protected static int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
-        // EGL14.EGL_CONTEXT_CLIENT_VERSION
-
-
+        @Override
         public EGLContext createContext(
                 EGL10 egl,
                 EGLDisplay display,
@@ -323,13 +335,14 @@ public class GlMapView
             Log.w(Constants.TAG, "creating OpenGL ES 2.0 context");
             checkEglError("Before eglCreateContext", egl);
             int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE};
-            EGLContext context =
+            mEglContext =
                     egl.eglCreateContext(display, eglConfig, EGL10.EGL_NO_CONTEXT, attrib_list);
             checkEglError("After eglCreateContext", egl);
-            return context;
+            return mEglContext;
         }
 
 
+        @Override
         public void destroyContext(
                 EGL10 egl,
                 EGLDisplay display,
@@ -340,29 +353,79 @@ public class GlMapView
     }
 
 
-    protected static class MapRenderer
+    protected class SurfaceFactory
+            implements GLSurfaceView.EGLWindowSurfaceFactory
+    {
+
+        public EGLSurface createWindowSurface(
+                EGL10 egl,
+                EGLDisplay display,
+                EGLConfig config,
+                Object nativeWindow)
+        {
+            mEglSurface = null;
+            try {
+                mEglSurface = egl.eglCreateWindowSurface(display, config, nativeWindow, null);
+            } catch (IllegalArgumentException e) {
+                Log.e(Constants.TAG, "eglCreateWindowSurface", e);
+            }
+            return mEglSurface;
+        }
+
+
+        public void destroySurface(
+                EGL10 egl,
+                EGLDisplay display,
+                EGLSurface surface)
+        {
+            egl.eglDestroySurface(display, surface);
+        }
+    }
+
+
+    protected class MapRenderer
             implements GLSurfaceView.Renderer
     {
+        @Override
         public void onSurfaceCreated(
                 GL10 gl,
                 EGLConfig config)
         {
-            GLES20.glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+            mMapDrawing.initDrawContext(mEgl, mEglDisplay, mEglSurface, mEglContext);
         }
 
 
+        @Override
         public void onSurfaceChanged(
                 GL10 gl,
                 int width,
                 int height)
         {
-            GLES20.glViewport(0, 0, width, height);
+            mMapDrawing.setSize(width, height);
         }
 
 
+        @Override
         public void onDrawFrame(GL10 gl)
         {
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+            mMapDrawing.draw();
         }
+    }
+
+
+    @Override
+    public void onMapDraw()
+    {
+        requestRender();
+
+        mDrawTime = System.currentTimeMillis() - mDrawTime;
+        Log.d(Constants.TAG, "Native map draw time: " + mDrawTime);
+    }
+
+
+    @Override
+    public void onRequestMapDraw()
+    {
+        requestRender();
     }
 }

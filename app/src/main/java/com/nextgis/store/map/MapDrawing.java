@@ -8,7 +8,6 @@ import com.nextgis.store.bindings.ErrorCodes;
 import com.nextgis.store.bindings.ProgressCallback;
 
 import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
@@ -18,7 +17,6 @@ public class MapDrawing
         extends DataStore
 {
     protected EGL10     mEgl;
-    protected EGLConfig mEglConfig;
 
     protected EGLDisplay mEglDisplay = EGL10.EGL_NO_DISPLAY;
     protected EGLSurface mEglSurface = EGL10.EGL_NO_SURFACE;
@@ -84,13 +82,6 @@ public class MapDrawing
         if (0 == mMapId) { return; }
 
         Api.ngsMapSetBackgroundColor(mMapId, (short) 0, (short) 255, (short) 0, (short) 255);
-
-//        if (Api.ngsMapSetSize(mMapId, mWidth, mHeight, mYOrient) == ErrorCodes.EC_SUCCESS) {
-//            mMapCenter = Api.ngsMapGetCenter(mMapId);
-//        }
-
-//        makeCurrent();
-//        Api.ngsMapInit(mMapId);
     }
 
 
@@ -167,7 +158,7 @@ public class MapDrawing
             return false;
         }
 
-        mDrawState = DrawState.DS_PRESERVED;
+        mDrawState = DrawState.DS_NORMAL;
 
         mWidth = width;
         mHeight = height;

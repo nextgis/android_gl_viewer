@@ -81,9 +81,6 @@ public class MapGlView
 
     protected void init()
     {
-        // Create an OpenGL ES 2.0 context with default EGLContextFactory and default EGLConfigChooser
-//        setEGLContextClientVersion(2);
-
         setEGLConfigChooser(new ConfigChooser(8, 8, 8, 0, 0, 0));
         setEGLContextFactory(new ContextFactory());
         setEGLWindowSurfaceFactory(new SurfaceFactory());
@@ -96,8 +93,8 @@ public class MapGlView
         mMapDrawing.setOnRequestMapDrawListener(this);
 
         mMapDrawing.createMap();
-        mMapDrawing.loadMap();
-//        mMapDrawing.openMap();
+//        mMapDrawing.loadMap();
+        mMapDrawing.openMap();
     }
 
 

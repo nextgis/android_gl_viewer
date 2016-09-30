@@ -40,6 +40,8 @@ public class MapGlView
 
     protected static final boolean DEBUG = false;
 
+    protected MainApplication mApp;
+
     protected EGL10     mEgl;
     protected EGLConfig mEglConfig;
 
@@ -50,18 +52,6 @@ public class MapGlView
     protected MapDrawing mMapDrawing;
 
     protected long mDrawTime;
-
-
-    // TODO: to MainApplication
-    protected String getMapPath()
-    {
-        Context context = getContext();
-        File defaultPath = getContext().getExternalFilesDir(SettingConstants.KEY_PREF_MAP);
-        if (defaultPath == null) {
-            defaultPath = new File(context.getFilesDir(), SettingConstants.KEY_PREF_MAP);
-        }
-        return defaultPath.getPath();
-    }
 
 
     public MapGlView(Context context)
@@ -82,6 +72,8 @@ public class MapGlView
 
     protected void init()
     {
+        mApp = (MainApplication) ((MainActivity) getContext()).getApplication();
+
         setEGLConfigChooser(new ConfigChooser(8, 8, 8, 0, 0, 0));
         setEGLContextFactory(new ContextFactory());
         setEGLWindowSurfaceFactory(new SurfaceFactory());
@@ -89,11 +81,7 @@ public class MapGlView
         setRenderer(new MapRenderer());
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY); // update with requestRender()
 
-        // TODO: to MainApplication
-        MainApplication app = (MainApplication) ((MainActivity) getContext()).getApplication();
-        String gdalDataPath = "/vsizip" + app.getApkPath() + "/assets/gdal_data";
-
-        mMapDrawing = new MapDrawing(getMapPath(), gdalDataPath);
+        mMapDrawing = new MapDrawing(mApp.getMapPath());
         mMapDrawing.setOnMapDrawListener(this);
         mMapDrawing.setOnRequestMapDrawListener(this);
 

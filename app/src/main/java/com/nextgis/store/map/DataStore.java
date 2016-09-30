@@ -27,16 +27,12 @@ public class DataStore
     protected ProgressCallback mLoadCallback;
 
 
-    public DataStore(String mapPath, String gdalDataPath)
+    public DataStore(String mapPath)
     {
         mMapPath = mapPath;
         mLoadCallback = createLoadCallback();
 
-        // TODO: to MainApplication
-        Api.ngsInit(gdalDataPath, null);
-        Log.d(Constants.TAG, "NGS formats: " + Api.ngsGetVersionString("formats"));
-
-        String storePath = mapPath + "/tmp/ngs.gpkg";
+        String storePath = mapPath + "/" + Constants.NGS_NAME;
         if (Api.ngsDataStoreInit(storePath) != ErrorCodes.EC_SUCCESS) {
             Log.d(Constants.TAG, "Error: Storage initialize failed");
             //return; // TODO: throw Ex
@@ -57,9 +53,7 @@ public class DataStore
     {
         closeMap();
 
-        File mapNativePath = new File(mMapPath, "test.ngmd");
-//        File mapNativePath = new File(mMapPath, "test-desktop.ngmd");
-//        File mapNativePath = new File(getMapPath(), "test-desktop-big.ngmd");
+        File mapNativePath = new File(mMapPath, Constants.DEFAULT_MAP_NAME);
         mMapId = Api.ngsMapOpen(mapNativePath.getPath());
 
         if (0 == mMapId) {
@@ -143,7 +137,7 @@ public class DataStore
 
     public boolean saveMap()
     {
-        File ngmdFile = new File(mMapPath, "test.ngmd");
+        File ngmdFile = new File(mMapPath, Constants.DEFAULT_MAP_NAME);
 
         if (Api.ngsMapSave(mMapId, ngmdFile.getPath()) != ErrorCodes.EC_SUCCESS) {
             Log.d(Constants.TAG, "Error: Map save failed");

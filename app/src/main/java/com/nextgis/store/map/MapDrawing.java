@@ -37,9 +37,9 @@ public class MapDrawing
     protected PointF     mCenter;
 
 
-    public MapDrawing(String mapPath, String gdalDataPath)
+    public MapDrawing(String mapPath)
     {
-        super(mapPath, gdalDataPath);
+        super(mapPath);
 
         mCenter = new PointF();
 

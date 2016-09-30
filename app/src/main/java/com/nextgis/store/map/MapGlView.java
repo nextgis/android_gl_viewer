@@ -85,9 +85,10 @@ public class MapGlView
         mMapDrawing.setOnMapDrawListener(this);
         mMapDrawing.setOnRequestMapDrawListener(this);
 
-        mMapDrawing.createMap();
-//        mMapDrawing.loadMap();
-        mMapDrawing.openMap();
+        if (!mMapDrawing.openMap()) {
+            mMapDrawing.createMap();
+            mMapDrawing.loadMap();
+        }
     }
 
 

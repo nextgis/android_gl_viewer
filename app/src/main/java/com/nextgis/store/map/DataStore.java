@@ -128,7 +128,7 @@ public class DataStore
             return false;
         }
 
-        File path = new File(info.getDstPath(), info.getNewName());
+        File path = new File(info.getDstPath(), info.getNewNames());
 
         // add loaded data to map as new layer
         if (Api.ngsMapCreateLayer(mMapId, info.getName(), path.getPath())

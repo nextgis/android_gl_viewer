@@ -1,11 +1,12 @@
 package com.nextgis.store.map;
 
 import android.content.Context;
-import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
 import com.nextgis.glviewer.Constants;
+import com.nextgis.glviewer.MainActivity;
+import com.nextgis.glviewer.MainApplication;
 import com.nextgis.glviewer.SettingConstants;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -88,7 +89,11 @@ public class MapGlView
         setRenderer(new MapRenderer());
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY); // update with requestRender()
 
-        mMapDrawing = new MapDrawing(getMapPath());
+        // TODO: to MainApplication
+        MainApplication app = (MainApplication) ((MainActivity) getContext()).getApplication();
+        String gdalDataPath = "/vsizip" + app.getApkPath() + "/assets/gdal_data";
+
+        mMapDrawing = new MapDrawing(getMapPath(), gdalDataPath);
         mMapDrawing.setOnMapDrawListener(this);
         mMapDrawing.setOnRequestMapDrawListener(this);
 

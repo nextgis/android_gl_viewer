@@ -37,9 +37,9 @@ public class MapDrawing
     protected PointF     mCenter;
 
 
-    public MapDrawing(String mapPath)
+    public MapDrawing(String mapPath, String gdalDataPath)
     {
-        super(mapPath);
+        super(mapPath, gdalDataPath);
 
         mCenter = new PointF();
 
@@ -158,7 +158,7 @@ public class MapDrawing
             return false;
         }
 
-        mDrawState = DrawState.DS_NORMAL;
+        mDrawState = DrawState.DS_NORMAL; // TODO: to DS_PRESERVED for performance
 
         mWidth = width;
         mHeight = height;

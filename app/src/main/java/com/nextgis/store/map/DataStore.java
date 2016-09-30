@@ -27,14 +27,13 @@ public class DataStore
     protected ProgressCallback mLoadCallback;
 
 
-    public DataStore(String mapPath)
+    public DataStore(String mapPath, String gdalDataPath)
     {
         mMapPath = mapPath;
         mLoadCallback = createLoadCallback();
 
         // TODO: to MainApplication
-        File gdalDir = new File(mMapPath, "gdal_data");
-        Api.ngsInit(gdalDir.getPath(), null);
+        Api.ngsInit(gdalDataPath, null);
         Log.d(Constants.TAG, "NGS formats: " + Api.ngsGetVersionString("formats"));
 
         String storePath = mapPath + "/tmp/ngs.gpkg";

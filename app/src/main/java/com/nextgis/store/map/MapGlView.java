@@ -2,12 +2,12 @@ package com.nextgis.store.map;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import com.nextgis.glviewer.Constants;
 import com.nextgis.glviewer.MainActivity;
 import com.nextgis.glviewer.MainApplication;
-import com.nextgis.glviewer.SettingConstants;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -15,7 +15,6 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL10;
-import java.io.File;
 
 
 public class MapGlView
@@ -43,7 +42,6 @@ public class MapGlView
     protected MainApplication mApp;
 
     protected EGL10     mEgl;
-    protected EGLConfig mEglConfig;
 
     protected EGLDisplay mEglDisplay;
     protected EGLSurface mEglSurface;
@@ -78,16 +76,50 @@ public class MapGlView
         setEGLContextFactory(new ContextFactory());
         setEGLWindowSurfaceFactory(new SurfaceFactory());
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            setPreserveEGLContextOnPause(true); // TODO: may be preserved, none guaranty, see docs
+        }
+
+        if (DEBUG) {
+            setDebugFlags(GLSurfaceView.DEBUG_CHECK_GL_ERROR | GLSurfaceView.DEBUG_LOG_GL_CALLS);
+        }
+
         setRenderer(new MapRenderer());
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY); // update with requestRender()
 
         mMapDrawing = new MapDrawing(mApp.getMapPath());
-        mMapDrawing.setOnMapDrawListener(this);
-        mMapDrawing.setOnRequestMapDrawListener(this);
 
         if (!mMapDrawing.openMap()) {
             mMapDrawing.createMap();
             mMapDrawing.loadMap();
+        }
+    }
+
+
+    @Override
+    public void onPause()
+    {
+        setListeners(false);
+        super.onPause();
+    }
+
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        setListeners(true);
+    }
+
+
+    protected void setListeners(boolean setIt)
+    {
+        if (setIt) {
+            mMapDrawing.setOnMapDrawListener(this);
+            mMapDrawing.setOnRequestMapDrawListener(this);
+        } else {
+            mMapDrawing.setOnMapDrawListener(null);
+            mMapDrawing.setOnRequestMapDrawListener(null);
         }
     }
 
@@ -160,8 +192,7 @@ public class MapGlView
             }
 
             // Now return the "best" one
-            mEglConfig = chooseConfig(egl, display, configs);
-            return mEglConfig;
+            return chooseConfig(egl, display, configs);
         }
 
 
@@ -340,6 +371,7 @@ public class MapGlView
                 EGLContext context)
         {
             egl.eglDestroyContext(display, context);
+            mEglContext = null;
         }
     }
 
@@ -369,7 +401,9 @@ public class MapGlView
                 EGLDisplay display,
                 EGLSurface surface)
         {
+//            mMapDrawing.releaseCurrent();
             egl.eglDestroySurface(display, surface);
+            mEglSurface = null;
         }
     }
 
@@ -382,6 +416,7 @@ public class MapGlView
                 GL10 gl,
                 EGLConfig config)
         {
+//            mMapDrawing.openMap();
             mMapDrawing.initDrawContext(mEgl, mEglDisplay, mEglSurface, mEglContext);
         }
 

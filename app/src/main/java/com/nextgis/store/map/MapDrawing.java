@@ -48,7 +48,7 @@ public class MapDrawing
     }
 
 
-    protected void makeCurrent()
+    public void makeCurrent()
     {
         if (null != mEgl && EGL10.EGL_NO_DISPLAY == mEgl.eglGetCurrentDisplay()
                 && EGL10.EGL_NO_SURFACE == mEgl.eglGetCurrentSurface(EGL10.EGL_DRAW)
@@ -56,6 +56,13 @@ public class MapDrawing
                 && EGL10.EGL_NO_CONTEXT == mEgl.eglGetCurrentContext()) {
             mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext);
         }
+    }
+
+
+    public void releaseCurrent()
+    {
+        mEgl.eglMakeCurrent(
+                mEglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
     }
 
 

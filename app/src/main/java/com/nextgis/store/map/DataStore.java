@@ -80,8 +80,10 @@ public class DataStore
 
     public void loadMap()
     {
-        File sceneDir = new File(mMapPath, "scenes");
-        File sceneFile = new File(sceneDir, "scenes.shp");
+//        File sceneDir = new File(mMapPath, "scenes");
+//        File sceneFile = new File(sceneDir, "scenes.shp");
+        File sceneDir = new File(mMapPath, "orbview3_catalog");
+        File sceneFile = new File(sceneDir, "orbview3_catalog.shp");
         String sceneFilePath = sceneFile.getPath();
         String filenameArray[] = sceneFile.getName().split("\\.");
         String sceneFileName = filenameArray[0];

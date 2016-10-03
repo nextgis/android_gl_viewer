@@ -10,6 +10,7 @@ import com.nextgis.glviewer.MainActivity;
 import com.nextgis.glviewer.MainApplication;
 
 import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGL11;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
@@ -41,7 +42,7 @@ public class MapGlView
 
     protected MainApplication mApp;
 
-    protected EGL10     mEgl;
+    protected EGL10 mEgl;
 
     protected EGLDisplay mEglDisplay;
     protected EGLSurface mEglSurface;
@@ -125,13 +126,86 @@ public class MapGlView
 
 
     protected void checkEglError(
-            String prompt,
-            EGL10 egl)
+            EGL10 egl,
+            String prompt)
     {
         int error;
         while ((error = egl.eglGetError()) != EGL10.EGL_SUCCESS) {
-            Log.e(Constants.TAG, String.format("%s: EGL error: 0x%x", prompt, error));
+            Log.e(Constants.TAG, String.format("%s: EGL error: %s", prompt, getErrorString(error)));
         }
+    }
+
+
+    public static void throwEglException(
+            EGL10 egl,
+            String function)
+    {
+        int error;
+        StringBuilder sb = new StringBuilder();
+        while ((error = egl.eglGetError()) != EGL10.EGL_SUCCESS) {
+            sb.append(getErrorString(error)).append("\n");
+        }
+
+        String message = function + " failed";
+        if (sb.length() > 0) {
+            message += ": " + sb.toString();
+        }
+
+        Log.e(Constants.TAG, message);
+        throw new RuntimeException(message);
+    }
+
+
+    public static String formatEglError(
+            String function,
+            int error)
+    {
+        return function + " failed: " + getErrorString(error);
+    }
+
+
+    public static String getErrorString(int error)
+    {
+        switch (error) {
+            case EGL10.EGL_SUCCESS:
+                return "EGL_SUCCESS";
+            case EGL10.EGL_NOT_INITIALIZED:
+                return "EGL_NOT_INITIALIZED";
+            case EGL10.EGL_BAD_ACCESS:
+                return "EGL_BAD_ACCESS";
+            case EGL10.EGL_BAD_ALLOC:
+                return "EGL_BAD_ALLOC";
+            case EGL10.EGL_BAD_ATTRIBUTE:
+                return "EGL_BAD_ATTRIBUTE";
+            case EGL10.EGL_BAD_CONFIG:
+                return "EGL_BAD_CONFIG";
+            case EGL10.EGL_BAD_CONTEXT:
+                return "EGL_BAD_CONTEXT";
+            case EGL10.EGL_BAD_CURRENT_SURFACE:
+                return "EGL_BAD_CURRENT_SURFACE";
+            case EGL10.EGL_BAD_DISPLAY:
+                return "EGL_BAD_DISPLAY";
+            case EGL10.EGL_BAD_MATCH:
+                return "EGL_BAD_MATCH";
+            case EGL10.EGL_BAD_NATIVE_PIXMAP:
+                return "EGL_BAD_NATIVE_PIXMAP";
+            case EGL10.EGL_BAD_NATIVE_WINDOW:
+                return "EGL_BAD_NATIVE_WINDOW";
+            case EGL10.EGL_BAD_PARAMETER:
+                return "EGL_BAD_PARAMETER";
+            case EGL10.EGL_BAD_SURFACE:
+                return "EGL_BAD_SURFACE";
+            case EGL11.EGL_CONTEXT_LOST:
+                return "EGL_CONTEXT_LOST";
+            default:
+                return getHex(error);
+        }
+    }
+
+
+    private static String getHex(int value)
+    {
+        return "0x" + Integer.toHexString(value);
     }
 
 
@@ -192,7 +266,11 @@ public class MapGlView
             }
 
             // Now return the "best" one
-            return chooseConfig(egl, display, configs);
+            EGLConfig config = chooseConfig(egl, display, configs);
+            if (config == null) {
+                throw new IllegalArgumentException("No config chosen");
+            }
+            return config;
         }
 
 
@@ -355,11 +433,13 @@ public class MapGlView
                 EGLConfig eglConfig)
         {
             Log.w(Constants.TAG, "creating OpenGL ES 2.0 context");
-            checkEglError("Before eglCreateContext", egl);
+            checkEglError(egl, "Before eglCreateContext");
             int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE};
             mEglContext =
                     egl.eglCreateContext(display, eglConfig, EGL10.EGL_NO_CONTEXT, attrib_list);
-            checkEglError("After eglCreateContext", egl);
+            if (EGL10.EGL_NO_CONTEXT == mEglContext) {
+                throwEglException(egl, "eglCreateContext");
+            }
             return mEglContext;
         }
 
@@ -370,7 +450,9 @@ public class MapGlView
                 EGLDisplay display,
                 EGLContext context)
         {
-            egl.eglDestroyContext(display, context);
+            if (!egl.eglDestroyContext(display, context)) {
+                throwEglException(egl, "eglDestroyContex");
+            }
             mEglContext = null;
         }
     }
@@ -389,8 +471,12 @@ public class MapGlView
             mEglSurface = null;
             try {
                 mEglSurface = egl.eglCreateWindowSurface(display, config, nativeWindow, null);
+                if (EGL10.EGL_NO_SURFACE == mEglSurface) {
+                    throwEglException(egl, "eglCreateWindowSurface");
+                }
             } catch (IllegalArgumentException e) {
                 Log.e(Constants.TAG, "eglCreateWindowSurface", e);
+                throw new RuntimeException("eglCreateWindowSurface", e);
             }
             return mEglSurface;
         }
@@ -402,7 +488,9 @@ public class MapGlView
                 EGLSurface surface)
         {
 //            mMapDrawing.releaseCurrent();
-            egl.eglDestroySurface(display, surface);
+            if (!egl.eglDestroySurface(display, surface)) {
+                throwEglException(egl, "eglDestroySurface");
+            }
             mEglSurface = null;
         }
     }

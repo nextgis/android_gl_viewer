@@ -28,9 +28,9 @@ public class MapGlView
         extends GLSurfaceView
         implements MapDrawing.OnMapDrawListener,
                    MapDrawing.OnRequestMapDrawListener,
-                   GestureDetector.OnGestureListener
-//                   GestureDetector.OnDoubleTapListener,
-//                   ScaleGestureDetector.OnScaleGestureListener
+                   GestureDetector.OnGestureListener,
+                   GestureDetector.OnDoubleTapListener,
+                   ScaleGestureDetector.OnScaleGestureListener
 {
     // EGL14.EGL_CONTEXT_CLIENT_VERSION
     protected static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
@@ -106,7 +106,7 @@ public class MapGlView
         mApp = (MainApplication) ((MainActivity) getContext()).getApplication();
 
         mGestureDetector = new GestureDetector(context, this);
-//        mScaleGestureDetector = new ScaleGestureDetector(context, this);
+        mScaleGestureDetector = new ScaleGestureDetector(context, this);
         mScroller = new Scroller(context);
 
         mStartDragLocation = new PointF();
@@ -619,7 +619,7 @@ public class MapGlView
 
             mCurrentDragOffset.set(x, y);
 
-            mMapDrawing.offset(distanceX, -distanceY);
+            mMapDrawing.offset(distanceX, distanceY);
             mMapDrawing.requestDraw(DrawState.DS_NORMAL);
         }
     }
@@ -628,78 +628,76 @@ public class MapGlView
     public void panStop()
     {
         if (mDrawingState == DRAW_STATE_panning) {
-            mMapDisplayCenter.offset(mCurrentDragOffset.x, -mCurrentDragOffset.y);
+            mMapDisplayCenter.offset(mCurrentDragOffset.x, mCurrentDragOffset.y);
             mMapDrawing.setCenter(mMapDisplayCenter.x, mMapDisplayCenter.y);
             mMapDrawing.requestDraw(DrawState.DS_NORMAL);
         }
     }
 
 
-//    public void zoomStart(ScaleGestureDetector scaleGestureDetector)
-//    {
-//        if (mDrawingState == DRAW_STATE_zooming) {
-//            return;
-//        }
-//
-//        mDrawingState = DRAW_STATE_zooming;
-//        mCurrentSpan = scaleGestureDetector.getCurrentSpan();
-//        mCurrentFocusLocation.set(
-//                scaleGestureDetector.getFocusX(), scaleGestureDetector.getFocusY());
-//        mCurrentFocusOffset.set(0, 0);
-//        mScaleFactor = 1.0;
-//    }
-//
-//
-//    public void zoom(ScaleGestureDetector scaleGestureDetector)
-//    {
-//        if (mDrawingState != DRAW_STATE_zooming) {
-//            zoomStart(scaleGestureDetector);
-//        }
-//
-//        if (mDrawingState == DRAW_STATE_zooming) {
-//            mScaleFactor =
-//                    scaleGestureDetector.getScaleFactor() * scaleGestureDetector.getCurrentSpan()
-//                            / mCurrentSpan;
-//
-//            double invertScale = 1 / mScaleFactor;
-//            double offX = (1 - invertScale) * (mCurrentFocusLocation.x);
-//            double offY = (1 - invertScale) * (mCurrentFocusLocation.y);
-//            mCurrentFocusOffset.set((float) offX, (float) offY);
-//
-//            requestRender();
-//        }
-//    }
-//
-//
-//    public void zoomStop()
-//    {
-//        if (mDrawingState == DRAW_STATE_zooming) {
-////            drawMap();
-//        }
-//    }
+    public void zoomStart(ScaleGestureDetector scaleGestureDetector)
+    {
+        if (mDrawingState == DRAW_STATE_zooming) {
+            return;
+        }
+
+        mDrawingState = DRAW_STATE_zooming;
+        mCurrentSpan = scaleGestureDetector.getCurrentSpan();
+        mCurrentFocusLocation.set(
+                scaleGestureDetector.getFocusX(), scaleGestureDetector.getFocusY());
+        mCurrentFocusOffset.set(0, 0);
+        mScaleFactor = 1.0;
+    }
 
 
-//    @Override
-//    public boolean onDoubleTap(MotionEvent e)
-//    {
-////        if (mMapDrawing.isDrawingEmpty()) {
-////            return false;
-////        }
-//
-//        mDrawingState = DRAW_STATE_zooming;
-//        mCurrentFocusLocation.set(e.getX(), e.getY());
-//        mScaleFactor = 2.0;
-//
-//        double invertScale = 1 / mScaleFactor;
-//        double offX = (1 - invertScale) * (mCurrentFocusLocation.x);
-//        double offY = (1 - invertScale) * (mCurrentFocusLocation.y);
-//        mCurrentFocusOffset.set((float) offX, (float) offY);
-//
-//        requestRender();
-////        drawMap();
-//
-//        return true;
-//    }
+    public void zoom(ScaleGestureDetector scaleGestureDetector)
+    {
+        if (mDrawingState != DRAW_STATE_zooming) {
+            zoomStart(scaleGestureDetector);
+        }
+
+        if (mDrawingState == DRAW_STATE_zooming) {
+            mScaleFactor =
+                    scaleGestureDetector.getScaleFactor() * scaleGestureDetector.getCurrentSpan()
+                            / mCurrentSpan;
+
+            double invertScale = 1 / mScaleFactor;
+            double offX = (1 - invertScale) * (mCurrentFocusLocation.x);
+            double offY = (1 - invertScale) * (mCurrentFocusLocation.y);
+            mCurrentFocusOffset.set((float) offX, (float) offY);
+
+            mMapDrawing.scale(mScaleFactor, mCurrentFocusLocation.x, mCurrentFocusLocation.y);
+            mMapDrawing.requestDraw(DrawState.DS_NORMAL);
+        }
+    }
+
+
+    public void zoomStop()
+    {
+        if (mDrawingState == DRAW_STATE_zooming) {
+            mMapDrawing.scale(mScaleFactor, mCurrentFocusLocation.x, mCurrentFocusLocation.y);
+            mMapDrawing.requestDraw(DrawState.DS_NORMAL);
+        }
+    }
+
+
+    @Override
+    public boolean onDoubleTap(MotionEvent e)
+    {
+        mDrawingState = DRAW_STATE_zooming;
+        mCurrentFocusLocation.set(e.getX(), e.getY());
+        mScaleFactor = 2.0;
+
+        double invertScale = 1 / mScaleFactor;
+        double offX = (1 - invertScale) * (mCurrentFocusLocation.x);
+        double offY = (1 - invertScale) * (mCurrentFocusLocation.y);
+        mCurrentFocusOffset.set((float) offX, (float) offY);
+
+        mMapDrawing.scale(mScaleFactor, mCurrentFocusLocation.x, mCurrentFocusLocation.y);
+        mMapDrawing.requestDraw(DrawState.DS_NORMAL);
+
+        return true;
+    }
 
 
     @Override
@@ -745,7 +743,7 @@ public class MapGlView
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-//        mScaleGestureDetector.onTouchEvent(event);
+        mScaleGestureDetector.onTouchEvent(event);
 
         if (!mGestureDetector.onTouchEvent(event)) {
             // TODO: get action can be more complicated:
@@ -796,27 +794,27 @@ public class MapGlView
     }
 
 
-//    @Override
-//    public boolean onScaleBegin(ScaleGestureDetector detector)
-//    {
-//        zoomStart(detector);
-//        return true;
-//    }
-//
-//
-//    @Override
-//    public boolean onScale(ScaleGestureDetector detector)
-//    {
-//        zoom(detector);
-//        return true;
-//    }
-//
-//
-//    @Override
-//    public void onScaleEnd(ScaleGestureDetector detector)
-//    {
-//        zoomStop();
-//    }
+    @Override
+    public boolean onScaleBegin(ScaleGestureDetector detector)
+    {
+        zoomStart(detector);
+        return true;
+    }
+
+
+    @Override
+    public boolean onScale(ScaleGestureDetector detector)
+    {
+        zoom(detector);
+        return true;
+    }
+
+
+    @Override
+    public void onScaleEnd(ScaleGestureDetector detector)
+    {
+        zoomStop();
+    }
 
 
     @Override
@@ -845,16 +843,16 @@ public class MapGlView
     }
 
 
-//    @Override
-//    public boolean onSingleTapConfirmed(MotionEvent e)
-//    {
-//        return false;
-//    }
-//
-//
-//    @Override
-//    public boolean onDoubleTapEvent(MotionEvent e)
-//    {
-//        return false;
-//    }
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent e)
+    {
+        return false;
+    }
+
+
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent e)
+    {
+        return false;
+    }
 }

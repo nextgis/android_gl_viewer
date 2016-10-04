@@ -24,7 +24,7 @@ public class MapDrawing
 
     protected int mWidth;
     protected int mHeight;
-    protected int mYOrient;
+    protected int mYOrient = 0;
 
     protected int mDrawState = DrawState.DS_NORMAL;
 
@@ -33,7 +33,6 @@ public class MapDrawing
     protected OnMapDrawListener        mOnMapDrawListener;
     protected OnRequestMapDrawListener mOnRequestMapDrawListener;
 
-    protected Coordinate mMapCenter;
     protected PointF     mCenter;
 
 
@@ -157,6 +156,12 @@ public class MapDrawing
     }
 
 
+    public double invertY(double y)
+    {
+        return mHeight - y;
+    }
+
+
     public PointF getCenter()
     {
         return mCenter;
@@ -167,8 +172,8 @@ public class MapDrawing
             double x,
             double y)
     {
-        mMapCenter = Api.ngsMapGetCoordinate(mMapId, x, y);
-        Api.ngsMapSetCenter(mMapId, mMapCenter.getX(), mMapCenter.getY());
+        Coordinate center = Api.ngsMapGetCoordinate(mMapId, x, invertY(y));
+        Api.ngsMapSetCenter(mMapId, center.getX(), center.getY());
     }
 
 
@@ -196,10 +201,46 @@ public class MapDrawing
         mHeight = height;
         mCenter.set(width / 2, height / 2);
 
-        if (Api.ngsMapSetSize(mMapId, width, height, mYOrient) == ErrorCodes.EC_SUCCESS) {
-            mMapCenter = Api.ngsMapGetCenter(mMapId);
-        }
-        return true;
+        return Api.ngsMapSetSize(mMapId, width, height, mYOrient) == ErrorCodes.EC_SUCCESS;
+    }
+
+
+    public void scale(
+            double scaleFactor,
+            double focusLocationX,
+            double focusLocationY)
+    {
+        setScaleByFactor(scaleFactor);
+        setScaledFocusLocation(scaleFactor, focusLocationX, focusLocationY);
+    }
+
+
+    public void setScaleByFactor(double scaleFactor)
+    {
+        double scale = Api.ngsMapGetScale(mMapId);
+        scale *= scaleFactor;
+        Api.ngsMapSetScale(mMapId, scale);
+    }
+
+
+    public void setScaledFocusLocation(
+            double scaleFactor,
+            double x,
+            double y)
+    {
+        double centerX = mCenter.x;
+        double centerY = mCenter.y;
+        double distX = centerX - x;
+        double distY = centerY - y;
+        double scaledDistX = distX * scaleFactor;
+        double scaledDistY = distY * scaleFactor;
+        double offX = scaledDistX - distX;
+        double offY = scaledDistY - distY;
+
+        centerX -= offX;
+        centerY -= offY;
+
+        setCenter(centerX, centerY);
     }
 
 
@@ -272,74 +313,4 @@ public class MapDrawing
     {
         void onRequestMapDraw();
     }
-
-
-//
-//
-//    public void sizedDraw(
-//            int width,
-//            int height)
-//    {
-//        if (!setSize(width, height)) {
-//            return;
-//        }
-//
-////        Point center = new Point();
-////        center.setX(308854.653167);
-////        center.setY(4808439.3765);
-////        Api.ngsSetMapCenter(mMapId, center);
-////        Api.ngsSetMapScale(mMapId, 0.0003);
-//
-//        requestDraw();
-//    }
-//
-//
-//    public void centeredDraw(
-//            double centerX,
-//            double centerY)
-//    {
-//        setCenter(centerX, centerY);
-//        requestDraw();
-//    }
-//
-//
-//    public void scaledDraw(
-//            double scaleFactor,
-//            double focusLocationX,
-//            double focusLocationY)
-//    {
-//        setScaleByFactor(scaleFactor);
-//        setScaledFocusLocation(scaleFactor, focusLocationX, focusLocationY);
-//        requestDraw();
-//    }
-//
-//
-//    public void setScaleByFactor(double scaleFactor)
-//    {
-//        double[] scale = new double[1];
-//        Api.ngsMapGetScale(mMapId, scale);
-//        scale[0] *= scaleFactor;
-//        Api.ngsMapSetScale(mMapId, scale[0]);
-//    }
-//
-//
-//    public void setScaledFocusLocation(
-//            double scaleFactor,
-//            double x,
-//            double y)
-//    {
-//        RawPoint center = new RawPoint();
-//        Api.ngsMapGetDisplayCenter(mMapId, center);
-//
-//        double distX = center.getX() - x;
-//        double distY = center.getY() - y;
-//        double scaledDistX = distX * scaleFactor;
-//        double scaledDistY = distY * scaleFactor;
-//        double offX = scaledDistX - distX;
-//        double offY = scaledDistY - distY;
-//
-//        center.setX(center.getX() - offX);
-//        center.setY(center.getY() - offY);
-//        Api.ngsMapSetDisplayCenter(mMapId, center);
-//    }
 }

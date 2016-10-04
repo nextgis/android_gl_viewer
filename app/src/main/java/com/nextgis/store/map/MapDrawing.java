@@ -16,7 +16,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 public class MapDrawing
         extends DataStore
 {
-    protected EGL10     mEgl;
+    protected EGL10 mEgl;
 
     protected EGLDisplay mEglDisplay = EGL10.EGL_NO_DISPLAY;
     protected EGLSurface mEglSurface = EGL10.EGL_NO_SURFACE;
@@ -79,7 +79,7 @@ public class MapDrawing
 
         if (0 == mMapId) { return; }
 
-        makeCurrent();
+//        makeCurrent();
         Api.ngsMapInit(mMapId);
     }
 
@@ -119,7 +119,7 @@ public class MapDrawing
     public boolean closeMap()
     {
         if (0 != mMapId) {
-            makeCurrent();
+//            makeCurrent();
             return super.closeMap();
         }
         return false;
@@ -154,6 +154,31 @@ public class MapDrawing
             int height)
     {
         return !(width == mWidth && height == mHeight);
+    }
+
+
+    public PointF getCenter()
+    {
+        return mCenter;
+    }
+
+
+    public void setCenter(
+            double x,
+            double y)
+    {
+        mMapCenter = Api.ngsMapGetCoordinate(mMapId, x, y);
+        Api.ngsMapSetCenter(mMapId, mMapCenter.getX(), mMapCenter.getY());
+    }
+
+
+    public void offset(
+            float x,
+            float y)
+    {
+        PointF pt = new PointF(mCenter.x, mCenter.y);
+        pt.offset(x, y);
+        setCenter(pt.x, pt.y);
     }
 
 
@@ -286,28 +311,6 @@ public class MapDrawing
 //        setScaleByFactor(scaleFactor);
 //        setScaledFocusLocation(scaleFactor, focusLocationX, focusLocationY);
 //        requestDraw();
-//    }
-//
-//
-//    public void setCenter(
-//            double x,
-//            double y)
-//    {
-//        RawPoint center = new RawPoint();
-//        center.setX(x);
-//        center.setY(y);
-//        Api.ngsMapSetDisplayCenter(mMapId, center);
-//    }
-//
-//
-//    public PointF getCenter()
-//    {
-//        RawPoint center = new RawPoint();
-//        Api.ngsMapGetDisplayCenter(mMapId, center);
-//        PointF point = new PointF();
-//        point.x = (float) center.getX();
-//        point.y = (float) center.getY();
-//        return point;
 //    }
 //
 //

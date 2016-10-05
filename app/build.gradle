@@ -36,6 +36,12 @@ dependencies {
 
 
 // native cmaked part
+
+// useful links
+// https://developer.android.com/studio/projects/add-native-code.html
+// https://developer.android.com/ndk/guides/cmake.html#variables
+// https://developer.android.com/ndk/guides/abis.html#sa
+
 android {
 //    defaultPublishConfig "debug" // uncomment it for the debug of the native code
 }
@@ -44,16 +50,24 @@ def String buildConfig = android.defaultPublishConfig.substring(0, 1).toUpperCas
         android.defaultPublishConfig.substring(1, android.defaultPublishConfig.length())
 
 android {
-    // drop mips for now "mips", , "mips64"
-//    def cmAndroidAbis = ["armeabi", "armeabi-v7a", "x86", "arm64-v8a", "x86_64"]
-    def cmAndroidAbis = ["armeabi-v7a"] // TODO:
-    def String abiFiltersString = cmAndroidAbis.toString()
-    abiFiltersString = abiFiltersString.substring(1, abiFiltersString.length() - 1)
+// From Android Studio 2.2 Preview 6 (July 22, 2016) report:
+// significantly improve build/deploy/debug cycle by only building the ABI
+// that is needed for the target device or emulator.
+
+//    def cmAndroidAbis = ["armeabi", "armeabi-v7a", "x86", "mips", "arm64-v8a", "x86_64", "mips64"]
+    def cmAndroidAbis = ["armeabi-v7a", "arm64-v8a"]
+//    def cmAndroidAbis = ["armeabi-v7a"] // for debug
+//    def String abiFiltersString = cmAndroidAbis.toString()
+//    abiFiltersString = abiFiltersString.substring(1, abiFiltersString.length() - 1)
 
     defaultConfig {
+        ndk {
+            abiFilters = cmAndroidAbis // what ABIs gradle should package into one apk
+        }
+
         externalNativeBuild {
             cmake {
-                abiFilters "${abiFiltersString}"
+                abiFilters = cmAndroidAbis // what ABIs gradle should build
 
 //                targets "ngstore", "ngstoreapi", "ngsandroid" // TODO:
 
@@ -62,11 +76,26 @@ android {
 //                        "-DSKIP_GIT_PULL=TRUE",
 //                        "-DSTRIP_NGS_LIBS=TRUE",
 
-                        "-DANDROID_PLATFORM=android-9", // ${getNdkPlatformLevel(abi)} // TODO:
-                        "-DANDROID_TOOLCHAIN=gcc",
-//                        "-DANDROID_TOOLCHAIN=clang",
-                        "-DANDROID_STL=gnustl_static",
-//                        "-DANDROID_STL=c++_static",
+                        //"-DANDROID_PLATFORM=android-9", // ${getNdkPlatformLevel(abi)}
+// We could not specify ANDROID_PLATFORM:
+// From Android Studio 2.2 Preview 5 (July 8, 2016) report:
+// Enhanced logic for selecting platform version for ndk-build and CMake:
+//  (1) get the set of ABIs based on compileSdkVersion.
+//  (2) then for each of these ABIs we have decided to build for,
+//      (a) if platforms/android-[min sdk]/arch-[ABI] exists,
+//          then use the min sdk  as platform for that ABI.
+//      (b) else if there exists platforms/android-[platform]/arch-[ABI] such that
+//          platform < min sdk, use max(platform where platform < min sdk).
+//      (c) else use min(platform where platforms/android-[platform]/arch-[ABI]  exists).
+
+                        // gcc
+//                        "-DANDROID_TOOLCHAIN=gcc",
+//                        "-DANDROID_STL=gnustl_static",
+
+                        // clang
+                        "-DANDROID_TOOLCHAIN=clang",
+                        "-DANDROID_STL=c++_static",
+
                         "-DANDROID_CPP_FEATURES=rtti exceptions",
 //                        "-DCMAKE_TOOLCHAIN_FILE=${projectDir}/libngsandroid/cmake/android.toolchain.cmake",
                         "-GAndroid Gradle - Unix Makefiles",

@@ -1,6 +1,8 @@
 package com.nextgis.store.map;
 
 import android.graphics.PointF;
+import android.util.Log;
+import com.nextgis.glviewer.Constants;
 import com.nextgis.store.bindings.Api;
 import com.nextgis.store.bindings.Coordinate;
 import com.nextgis.store.bindings.DrawState;
@@ -22,64 +24,26 @@ public class MapDrawing
     protected EGLSurface mEglSurface = EGL10.EGL_NO_SURFACE;
     protected EGLContext mEglContext = EGL10.EGL_NO_CONTEXT;
 
-    protected int mWidth;
-    protected int mHeight;
+    protected int    mWidth;
+    protected int    mHeight;
+    protected PointF mCenter;
     protected int mYOrient = 0;
 
-    protected int mDrawState = DrawState.DS_NORMAL;
+    protected int    mDrawState;
+    protected double mDrawComplete;
+    protected long   mDrawTime;
 
-    protected ProgressCallback         mDrawCallback;
-    protected double                   mDrawComplete;
-    protected OnMapDrawListener        mOnMapDrawListener;
-    protected OnRequestMapDrawListener mOnRequestMapDrawListener;
-
-    protected PointF     mCenter;
+    protected ProgressCallback        mDrawCallback;
+    protected OnRequestRenderListener mOnRequestRenderListener;
 
 
     public MapDrawing(String mapPath)
     {
         super(mapPath);
 
+        setDrawState(DrawState.DS_REDRAW);
         mCenter = new PointF();
-
-        mDrawComplete = 0;
         mDrawCallback = createDrawCallback();
-    }
-
-
-    public void makeCurrent()
-    {
-        if (null != mEgl && EGL10.EGL_NO_DISPLAY == mEgl.eglGetCurrentDisplay()
-                && EGL10.EGL_NO_SURFACE == mEgl.eglGetCurrentSurface(EGL10.EGL_DRAW)
-                && EGL10.EGL_NO_SURFACE == mEgl.eglGetCurrentSurface(EGL10.EGL_READ)
-                && EGL10.EGL_NO_CONTEXT == mEgl.eglGetCurrentContext()) {
-            mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext);
-        }
-    }
-
-
-    public void releaseCurrent()
-    {
-        mEgl.eglMakeCurrent(
-                mEglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
-    }
-
-
-    public void initDrawContext(
-            EGL10 egl,
-            EGLDisplay eglDisplay,
-            EGLSurface eglSurface,
-            EGLContext eglContext)
-    {
-        mEgl = egl;
-        mEglDisplay = eglDisplay;
-        mEglSurface = eglSurface;
-        mEglContext = eglContext;
-
-        if (0 == mMapId) { return; }
-
-//        makeCurrent();
-        Api.ngsMapInit(mMapId);
     }
 
 
@@ -106,8 +70,8 @@ public class MapDrawing
     public boolean openMap()
     {
         if (super.openMap()) {
-            mDrawState = DrawState.DS_REDRAW;
             initMapProps();
+            setDrawState(DrawState.DS_REDRAW);
             return true;
         }
         return false;
@@ -129,30 +93,11 @@ public class MapDrawing
     protected boolean onLoadFinished(int taskId)
     {
         if (super.onLoadFinished(taskId)) {
-            requestDraw(DrawState.DS_NORMAL);
+            setDrawState(DrawState.DS_NORMAL);
+            requestRender();
             return true;
         }
         return false;
-    }
-
-
-    public int getHeight()
-    {
-        return mHeight;
-    }
-
-
-    public int getWidth()
-    {
-        return mWidth;
-    }
-
-
-    public boolean isSizeChanged(
-            int width,
-            int height)
-    {
-        return !(width == mWidth && height == mHeight);
     }
 
 
@@ -187,6 +132,26 @@ public class MapDrawing
     }
 
 
+    public int getHeight()
+    {
+        return mHeight;
+    }
+
+
+    public int getWidth()
+    {
+        return mWidth;
+    }
+
+
+    public boolean isSizeChanged(
+            int width,
+            int height)
+    {
+        return !(width == mWidth && height == mHeight);
+    }
+
+
     public boolean setSize(
             int width,
             int height)
@@ -195,11 +160,11 @@ public class MapDrawing
             return false;
         }
 
-        mDrawState = DrawState.DS_NORMAL; // TODO: to DS_PRESERVED for performance
-
         mWidth = width;
         mHeight = height;
         mCenter.set(width / 2, height / 2);
+
+        setDrawState(DrawState.DS_NORMAL); // TODO: to DS_PRESERVED for performance
 
         return Api.ngsMapSetSize(mMapId, width, height, mYOrient) == ErrorCodes.EC_SUCCESS;
     }
@@ -244,13 +209,54 @@ public class MapDrawing
     }
 
 
-    public void requestDraw(int drawState)
+    public void makeCurrent()
     {
-        mDrawComplete = 0;
-        mDrawState = drawState;
+        if (null != mEgl && EGL10.EGL_NO_DISPLAY == mEgl.eglGetCurrentDisplay()
+                && EGL10.EGL_NO_SURFACE == mEgl.eglGetCurrentSurface(EGL10.EGL_DRAW)
+                && EGL10.EGL_NO_SURFACE == mEgl.eglGetCurrentSurface(EGL10.EGL_READ)
+                && EGL10.EGL_NO_CONTEXT == mEgl.eglGetCurrentContext()) {
+            mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext);
+        }
+    }
 
-        if (null != mOnRequestMapDrawListener) {
-            mOnRequestMapDrawListener.onRequestMapDraw();
+
+    public void releaseCurrent()
+    {
+        mEgl.eglMakeCurrent(
+                mEglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+    }
+
+
+    public void initDrawContext(
+            EGL10 egl,
+            EGLDisplay eglDisplay,
+            EGLSurface eglSurface,
+            EGLContext eglContext)
+    {
+        mEgl = egl;
+        mEglDisplay = eglDisplay;
+        mEglSurface = eglSurface;
+        mEglContext = eglContext;
+
+        if (0 == mMapId) { return; }
+
+//        makeCurrent();
+        Api.ngsMapInit(mMapId);
+    }
+
+
+    public void setDrawState(int drawState)
+    {
+        mDrawState = drawState;
+        mDrawComplete = 0;
+        mDrawTime = System.currentTimeMillis();
+    }
+
+
+    protected void requestRender()
+    {
+        if (null != mOnRequestRenderListener) {
+            mOnRequestRenderListener.onRequestRender();
         }
     }
 
@@ -274,15 +280,12 @@ public class MapDrawing
             {
                 if (complete - mDrawComplete > 0.045) { // each 5% redraw
                     mDrawComplete = complete;
+                    requestRender();
+                }
 
-                    if (null != mOnMapDrawListener) {
-                        mOnMapDrawListener.onMapDraw();
-                    }
-
-//                    MapNativeView.this.postInvalidate();
-
-//                    mDrawTime = System.currentTimeMillis() - mDrawTime;
-//                    Log.d(TAG, "Native map draw time: " + mDrawTime);
+                if (complete > 0.999) {
+                    mDrawTime = System.currentTimeMillis() - mDrawTime;
+                    Log.d(Constants.TAG, "Native map draw time: " + mDrawTime);
                 }
 
                 return 1;
@@ -291,26 +294,14 @@ public class MapDrawing
     }
 
 
-    public void setOnMapDrawListener(OnMapDrawListener onMapDrawListener)
+    public void setOnRequestRenderListener(OnRequestRenderListener onRequestRenderListener)
     {
-        mOnMapDrawListener = onMapDrawListener;
+        mOnRequestRenderListener = onRequestRenderListener;
     }
 
 
-    interface OnMapDrawListener
+    interface OnRequestRenderListener
     {
-        void onMapDraw();
-    }
-
-
-    public void setOnRequestMapDrawListener(OnRequestMapDrawListener onRequestMapDrawListener)
-    {
-        mOnRequestMapDrawListener = onRequestMapDrawListener;
-    }
-
-
-    interface OnRequestMapDrawListener
-    {
-        void onRequestMapDraw();
+        void onRequestRender();
     }
 }

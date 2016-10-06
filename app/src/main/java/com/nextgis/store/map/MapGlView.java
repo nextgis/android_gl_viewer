@@ -26,8 +26,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class MapGlView
         extends GLSurfaceView
-        implements MapDrawing.OnMapDrawListener,
-                   MapDrawing.OnRequestMapDrawListener,
+        implements MapDrawing.OnRequestRenderListener,
                    GestureDetector.OnGestureListener,
                    GestureDetector.OnDoubleTapListener,
                    ScaleGestureDetector.OnScaleGestureListener
@@ -66,8 +65,6 @@ public class MapGlView
     protected EGLContext mEglContext;
 
     protected MapDrawing mMapDrawing;
-
-    protected long mDrawTime;
 
     protected GestureDetector      mGestureDetector;
     protected ScaleGestureDetector mScaleGestureDetector;
@@ -158,11 +155,9 @@ public class MapGlView
     protected void setListeners(boolean setIt)
     {
         if (setIt) {
-            mMapDrawing.setOnMapDrawListener(this);
-            mMapDrawing.setOnRequestMapDrawListener(this);
+            mMapDrawing.setOnRequestRenderListener(this);
         } else {
-            mMapDrawing.setOnMapDrawListener(null);
-            mMapDrawing.setOnRequestMapDrawListener(null);
+            mMapDrawing.setOnRequestRenderListener(null);
         }
     }
 
@@ -571,20 +566,24 @@ public class MapGlView
 
 
     @Override
-    public void onMapDraw()
+    public void requestRender()
     {
-        mDrawingState = DRAW_STATE_drawing;
-        requestRender();
+        throw new RuntimeException("Don't use requestRender(), use requestRender(drawState)");
+    }
 
-        mDrawTime = System.currentTimeMillis() - mDrawTime;
-        Log.d(Constants.TAG, "Native map draw time: " + mDrawTime);
+
+    public void requestRender(int drawState)
+    {
+        mMapDrawing.setDrawState(drawState);
+        super.requestRender();
     }
 
 
     @Override
-    public void onRequestMapDraw()
+    public void onRequestRender()
     {
-        requestRender();
+        mDrawingState = DRAW_STATE_drawing;
+        super.requestRender();
     }
 
 
@@ -618,7 +617,7 @@ public class MapGlView
             mCurrentDragOffset.set(x, y);
 
             mMapDrawing.offset(distanceX, distanceY);
-            mMapDrawing.requestDraw(DrawState.DS_PRESERVED);
+            requestRender(DrawState.DS_PRESERVED);
         }
     }
 
@@ -626,7 +625,7 @@ public class MapGlView
     public void panStop()
     {
         if (mDrawingState == DRAW_STATE_panning) {
-            mMapDrawing.requestDraw(DrawState.DS_NORMAL);
+            requestRender(DrawState.DS_NORMAL);
         }
     }
 
@@ -664,7 +663,7 @@ public class MapGlView
 //            mCurrentFocusOffset.set((float) offX, (float) offY);
 
             mMapDrawing.scale(mScaleFactor, mCurrentFocusLocation.x, mCurrentFocusLocation.y);
-            mMapDrawing.requestDraw(DrawState.DS_PRESERVED);
+            requestRender(DrawState.DS_PRESERVED);
         }
     }
 
@@ -672,7 +671,7 @@ public class MapGlView
     public void zoomStop()
     {
         if (mDrawingState == DRAW_STATE_zooming) {
-            mMapDrawing.requestDraw(DrawState.DS_NORMAL);
+            requestRender(DrawState.DS_NORMAL);
         }
     }
 
@@ -690,7 +689,7 @@ public class MapGlView
 //        mCurrentFocusOffset.set((float) offX, (float) offY);
 
         mMapDrawing.scale(mScaleFactor, mCurrentFocusLocation.x, mCurrentFocusLocation.y);
-        mMapDrawing.requestDraw(DrawState.DS_NORMAL);
+        requestRender(DrawState.DS_NORMAL);
 
         return true;
     }

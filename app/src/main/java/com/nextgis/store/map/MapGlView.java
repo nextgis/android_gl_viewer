@@ -76,7 +76,7 @@ public class MapGlView
     protected PointF mStartDragLocation;
     protected PointF mCurrentDragOffset;
     protected PointF mCurrentFocusLocation;
-//    protected PointF mCurrentFocusOffset;
+    //protected PointF mCurrentFocusOffset;
     protected PointF mMapDisplayCenter;
 
     protected int    mDrawingState;
@@ -114,6 +114,8 @@ public class MapGlView
         mCurrentFocusLocation = new PointF();
 //        mCurrentFocusOffset = new PointF();
         mMapDisplayCenter = new PointF();
+
+        mDrawingState = DRAW_STATE_none;
 
         setEGLConfigChooser(new ConfigChooser(8, 8, 8, 0, 0, 0));
         setEGLContextFactory(new ContextFactory());
@@ -590,8 +592,12 @@ public class MapGlView
 
     public void panStart(final MotionEvent e)
     {
-        if (mDrawingState == DRAW_STATE_zooming || mDrawingState == DRAW_STATE_panning ||
-                mDrawingState == DRAW_STATE_panning_fling) {
+//        if (mDrawingState == DRAW_STATE_zooming || mDrawingState == DRAW_STATE_panning ||
+//                mDrawingState == DRAW_STATE_panning_fling) {
+//            return;
+//        }
+
+        if (mDrawingState == DRAW_STATE_panning) {
             return;
         }
 
@@ -608,11 +614,6 @@ public class MapGlView
             float distanceX,
             float distanceY)
     {
-        if (mDrawingState == DRAW_STATE_zooming || mDrawingState == DRAW_STATE_drawing_noclearbk ||
-                mDrawingState == DRAW_STATE_drawing) {
-            return;
-        }
-
         if (mDrawingState == DRAW_STATE_panning) {
             float x = mStartDragLocation.x - e.getX();
             float y = mStartDragLocation.y - e.getY();
@@ -620,7 +621,7 @@ public class MapGlView
             mCurrentDragOffset.set(x, y);
 
             mMapDrawing.offset(distanceX, distanceY);
-            mMapDrawing.requestDraw(DrawState.DS_NORMAL);
+            mMapDrawing.requestDraw(DrawState.DS_PRESERVED);
         }
     }
 
@@ -668,7 +669,7 @@ public class MapGlView
 //            mCurrentFocusOffset.set((float) offX, (float) offY);
 
             mMapDrawing.scale(mScaleFactor, mCurrentFocusLocation.x, mCurrentFocusLocation.y);
-            mMapDrawing.requestDraw(DrawState.DS_NORMAL);
+            mMapDrawing.requestDraw(DrawState.DS_PRESERVED);
         }
     }
 
@@ -779,8 +780,12 @@ public class MapGlView
             float velocityX,
             float velocityY)
     {
-        if (mDrawingState == DRAW_STATE_zooming || mDrawingState == DRAW_STATE_drawing_noclearbk ||
-                mDrawingState == DRAW_STATE_drawing) {
+//        if (mDrawingState == DRAW_STATE_zooming || mDrawingState == DRAW_STATE_drawing_noclearbk ||
+//                mDrawingState == DRAW_STATE_drawing) {
+//            return false;
+//        }
+
+        if (mDrawingState == DRAW_STATE_zooming) {
             return false;
         }
 

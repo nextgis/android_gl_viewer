@@ -657,9 +657,10 @@ public class MapGlView
         }
 
         if (mDrawingState == DRAW_STATE_zooming) {
-            mScaleFactor =
-                    scaleGestureDetector.getScaleFactor() * scaleGestureDetector.getCurrentSpan()
-                            / mCurrentSpan;
+//            mScaleFactor =
+//                    scaleGestureDetector.getScaleFactor() * scaleGestureDetector.getCurrentSpan()
+//                            / mCurrentSpan;
+            mScaleFactor = scaleGestureDetector.getScaleFactor();
 
             double invertScale = 1 / mScaleFactor;
             double offX = (1 - invertScale) * (mCurrentFocusLocation.x);

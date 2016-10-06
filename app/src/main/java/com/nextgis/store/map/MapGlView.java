@@ -77,7 +77,6 @@ public class MapGlView
     protected PointF mCurrentDragOffset;
     protected PointF mCurrentFocusLocation;
     //protected PointF mCurrentFocusOffset;
-    protected PointF mMapDisplayCenter;
 
     protected int    mDrawingState;
     protected double mScaleFactor;
@@ -113,7 +112,6 @@ public class MapGlView
         mCurrentDragOffset = new PointF();
         mCurrentFocusLocation = new PointF();
 //        mCurrentFocusOffset = new PointF();
-        mMapDisplayCenter = new PointF();
 
         mDrawingState = DRAW_STATE_none;
 
@@ -605,7 +603,6 @@ public class MapGlView
 
         mStartDragLocation.set(e.getX(), e.getY());
         mCurrentDragOffset.set(0, 0);
-        mMapDisplayCenter.set(mMapDrawing.getCenter());
     }
 
 

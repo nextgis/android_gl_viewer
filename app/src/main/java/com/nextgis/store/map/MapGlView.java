@@ -629,8 +629,6 @@ public class MapGlView
     public void panStop()
     {
         if (mDrawingState == DRAW_STATE_panning) {
-            mMapDisplayCenter.offset(mCurrentDragOffset.x, mCurrentDragOffset.y);
-            mMapDrawing.setCenter(mMapDisplayCenter.x, mMapDisplayCenter.y);
             mMapDrawing.requestDraw(DrawState.DS_NORMAL);
         }
     }

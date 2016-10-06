@@ -672,7 +672,6 @@ public class MapGlView
     public void zoomStop()
     {
         if (mDrawingState == DRAW_STATE_zooming) {
-            mMapDrawing.scale(mScaleFactor, mCurrentFocusLocation.x, mCurrentFocusLocation.y);
             mMapDrawing.requestDraw(DrawState.DS_NORMAL);
         }
     }

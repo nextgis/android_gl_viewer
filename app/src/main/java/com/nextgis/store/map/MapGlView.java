@@ -76,7 +76,7 @@ public class MapGlView
     protected PointF mStartDragLocation;
     protected PointF mCurrentDragOffset;
     protected PointF mCurrentFocusLocation;
-    protected PointF mCurrentFocusOffset;
+//    protected PointF mCurrentFocusOffset;
     protected PointF mMapDisplayCenter;
 
     protected int    mDrawingState;
@@ -112,7 +112,7 @@ public class MapGlView
         mStartDragLocation = new PointF();
         mCurrentDragOffset = new PointF();
         mCurrentFocusLocation = new PointF();
-        mCurrentFocusOffset = new PointF();
+//        mCurrentFocusOffset = new PointF();
         mMapDisplayCenter = new PointF();
 
         setEGLConfigChooser(new ConfigChooser(8, 8, 8, 0, 0, 0));
@@ -645,7 +645,7 @@ public class MapGlView
         mCurrentSpan = scaleGestureDetector.getCurrentSpan();
         mCurrentFocusLocation.set(
                 scaleGestureDetector.getFocusX(), scaleGestureDetector.getFocusY());
-        mCurrentFocusOffset.set(0, 0);
+//        mCurrentFocusOffset.set(0, 0);
         mScaleFactor = 1.0;
     }
 
@@ -662,10 +662,10 @@ public class MapGlView
 //                            / mCurrentSpan;
             mScaleFactor = scaleGestureDetector.getScaleFactor();
 
-            double invertScale = 1 / mScaleFactor;
-            double offX = (1 - invertScale) * (mCurrentFocusLocation.x);
-            double offY = (1 - invertScale) * (mCurrentFocusLocation.y);
-            mCurrentFocusOffset.set((float) offX, (float) offY);
+//            double invertScale = 1 / mScaleFactor;
+//            double offX = (1 - invertScale) * (mCurrentFocusLocation.x);
+//            double offY = (1 - invertScale) * (mCurrentFocusLocation.y);
+//            mCurrentFocusOffset.set((float) offX, (float) offY);
 
             mMapDrawing.scale(mScaleFactor, mCurrentFocusLocation.x, mCurrentFocusLocation.y);
             mMapDrawing.requestDraw(DrawState.DS_NORMAL);
@@ -689,10 +689,10 @@ public class MapGlView
         mCurrentFocusLocation.set(e.getX(), e.getY());
         mScaleFactor = 2.0;
 
-        double invertScale = 1 / mScaleFactor;
-        double offX = (1 - invertScale) * (mCurrentFocusLocation.x);
-        double offY = (1 - invertScale) * (mCurrentFocusLocation.y);
-        mCurrentFocusOffset.set((float) offX, (float) offY);
+//        double invertScale = 1 / mScaleFactor;
+//        double offX = (1 - invertScale) * (mCurrentFocusLocation.x);
+//        double offY = (1 - invertScale) * (mCurrentFocusLocation.y);
+//        mCurrentFocusOffset.set((float) offX, (float) offY);
 
         mMapDrawing.scale(mScaleFactor, mCurrentFocusLocation.x, mCurrentFocusLocation.y);
         mMapDrawing.requestDraw(DrawState.DS_NORMAL);

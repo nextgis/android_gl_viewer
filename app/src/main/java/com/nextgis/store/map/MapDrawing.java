@@ -51,7 +51,7 @@ public class MapDrawing
     {
         if (0 == mMapId) { return; }
 
-        Api.ngsMapSetBackgroundColor(mMapId, (short) 0, (short) 255, (short) 0, (short) 255);
+        Api.ngsMapSetBackgroundColor(mMapId, (short) 192, (short) 192, (short) 192, (short) 255);
     }
 
 

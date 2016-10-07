@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.util.Log;
 import com.nextgis.ngsandroid.NgsAndroidJni;
 import com.nextgis.store.bindings.Api;
+import com.nextgis.store.bindings.Options;
 
 import java.io.File;
 
@@ -54,6 +55,16 @@ public class MainApplication
     protected void initNgs()
     {
         Api.ngsInit(getGdalPath(), null);
+        Api.ngsSetOptions(Options.OPT_DEBUGMODE);
         Log.d(Constants.TAG, "NGS formats: " + Api.ngsGetVersionString("formats"));
+    }
+
+
+    @Override
+    public void onLowMemory()
+    {
+        // TODO: ngsOnLowMemory
+//        Api.ngsOnLowMemory();
+        super.onLowMemory();
     }
 }

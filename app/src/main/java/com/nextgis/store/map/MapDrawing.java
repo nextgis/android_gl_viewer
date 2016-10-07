@@ -7,6 +7,7 @@ import com.nextgis.store.bindings.Api;
 import com.nextgis.store.bindings.Coordinate;
 import com.nextgis.store.bindings.DrawState;
 import com.nextgis.store.bindings.ErrorCodes;
+import com.nextgis.store.bindings.Options;
 import com.nextgis.store.bindings.ProgressCallback;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -36,6 +37,8 @@ public class MapDrawing
     protected ProgressCallback        mDrawCallback;
     protected OnRequestRenderListener mOnRequestRenderListener;
 
+    protected boolean mNgsDebugMode;
+
 
     public MapDrawing(String mapPath)
     {
@@ -44,6 +47,7 @@ public class MapDrawing
         setDrawState(DrawState.DS_REDRAW);
         mCenter = new PointF();
         mDrawCallback = createDrawCallback();
+        mNgsDebugMode = (Api.ngsGetOptions() & Options.OPT_DEBUGMODE) != 0;
     }
 
 
@@ -281,11 +285,19 @@ public class MapDrawing
                 if (complete - mDrawComplete > 0.045) { // each 5% redraw
                     mDrawComplete = complete;
                     requestRender();
+
+                    if (mNgsDebugMode) {
+                        Log.d(Constants.TAG, "Final indices count: " + message);
+                    }
                 }
 
                 if (complete > 0.999) {
                     mDrawTime = System.currentTimeMillis() - mDrawTime;
                     Log.d(Constants.TAG, "Native map draw time: " + mDrawTime);
+
+                    if (mNgsDebugMode) {
+                        Log.d(Constants.TAG, "Final indices count: " + message);
+                    }
                 }
 
                 return 1;
@@ -303,5 +315,12 @@ public class MapDrawing
     interface OnRequestRenderListener
     {
         void onRequestRender();
+    }
+
+
+    public void onPause()
+    {
+        // TODO: ngsOnPause()
+//        Api.ngsOnPause();
     }
 }

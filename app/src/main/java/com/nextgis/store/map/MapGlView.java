@@ -140,6 +140,7 @@ public class MapGlView
     public void onPause()
     {
         setListeners(false);
+        mMapDrawing.onPause();
         super.onPause();
     }
 

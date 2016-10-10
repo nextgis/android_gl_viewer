@@ -34,8 +34,10 @@ public class MapDrawing
     protected double mDrawComplete;
     protected long   mDrawTime;
 
-    protected ProgressCallback        mDrawCallback;
-    protected OnRequestRenderListener mOnRequestRenderListener;
+    protected ProgressCallback             mDrawCallback;
+    protected OnRequestRenderListener      mOnRequestRenderListener;
+    protected OnDrawTimeChangeListener     mOnDrawTimeChangeListener;
+    protected OnIndicesCountChangeListener mOnIndicesCountChangeListener;
 
     protected boolean mNgsDebugMode;
 
@@ -286,8 +288,8 @@ public class MapDrawing
                     mDrawComplete = complete;
                     requestRender();
 
-                    if (mNgsDebugMode) {
-                        Log.d(Constants.TAG, "Final indices count: " + message);
+                    if (mNgsDebugMode && null != mOnIndicesCountChangeListener) {
+                        mOnIndicesCountChangeListener.onIndicesCountChange(message);
                     }
                 }
 
@@ -296,7 +298,13 @@ public class MapDrawing
                     Log.d(Constants.TAG, "Native map draw time: " + mDrawTime);
 
                     if (mNgsDebugMode) {
-                        Log.d(Constants.TAG, "Final indices count: " + message);
+                        if (null != mOnDrawTimeChangeListener && mDrawTime < 10000000) {
+                            mOnDrawTimeChangeListener.onDrawTimeChange((int) mDrawTime);
+                        }
+
+                        if (null != mOnIndicesCountChangeListener) {
+                            mOnIndicesCountChangeListener.onIndicesCountChange(message);
+                        }
                     }
                 }
 
@@ -306,21 +314,45 @@ public class MapDrawing
     }
 
 
-    public void setOnRequestRenderListener(OnRequestRenderListener onRequestRenderListener)
+    public void onPause()
     {
-        mOnRequestRenderListener = onRequestRenderListener;
+        // TODO: ngsOnPause()
+//        Api.ngsOnPause();
     }
 
 
-    interface OnRequestRenderListener
+    public void setOnRequestRenderListener(OnRequestRenderListener listener)
+    {
+        mOnRequestRenderListener = listener;
+    }
+
+
+    public interface OnRequestRenderListener
     {
         void onRequestRender();
     }
 
 
-    public void onPause()
+    public void setOnDrawTimeChangeListener(OnDrawTimeChangeListener listener)
     {
-        // TODO: ngsOnPause()
-//        Api.ngsOnPause();
+        mOnDrawTimeChangeListener = listener;
+    }
+
+
+    public interface OnDrawTimeChangeListener
+    {
+        void onDrawTimeChange(int drawTime);
+    }
+
+
+    public void setOnIndicesCountChangeListener(OnIndicesCountChangeListener listener)
+    {
+        mOnIndicesCountChangeListener = listener;
+    }
+
+
+    public interface OnIndicesCountChangeListener
+    {
+        void onIndicesCountChange(String indicesCount);
     }
 }

@@ -18,4 +18,63 @@
             android:visibility="gone"
             />
 
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#aa0f8bc3"
+            android:orientation="vertical"
+            >
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="#ffffffcc"
+                    android:text="@string/draw_time"
+                    />
+
+            <TextView
+                    android:id="@+id/draw_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:background="#ff4a9dc2"
+                    android:textColor="#ffffffff"
+                    />
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="#ffffffcc"
+                    android:text="@string/triangles_count"
+                    />
+
+            <TextView
+                    android:id="@+id/triangles_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:background="#ff4a9dc2"
+                    android:textColor="#ffffffff"
+                    />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
 </RelativeLayout>

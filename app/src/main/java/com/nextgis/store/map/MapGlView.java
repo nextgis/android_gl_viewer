@@ -163,6 +163,12 @@ public class MapGlView
     }
 
 
+    public MapDrawing getMapDrawing()
+    {
+        return mMapDrawing;
+    }
+
+
     protected void checkEglError(
             EGL10 egl,
             String prompt)

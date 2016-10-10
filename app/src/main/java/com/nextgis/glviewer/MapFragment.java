@@ -1,5 +1,7 @@
 package com.nextgis.glviewer;
 
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -7,15 +9,27 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import com.nextgis.store.map.MapDrawing;
 import com.nextgis.store.map.MapGlView;
 
 
 public class MapFragment
         extends Fragment
+        implements MapDrawing.OnDrawTimeChangeListener,
+                   MapDrawing.OnIndicesCountChangeListener
+
 {
+    protected final static int DRAW_TIME     = 0;
+    protected final static int INDEXES_COUNT = 1;
+
     protected MainActivity   mActivity;
     protected MapGlView      mMapGlView;
     protected RelativeLayout mMapRelativeLayout;
+    protected TextView       mDrawTimeView;
+    protected TextView       mTrianglesView;
+
+    protected static Handler mHandler;
 
 
     @Override
@@ -27,6 +41,8 @@ public class MapFragment
 
         mMapGlView = new MapGlView(mActivity);
         mMapGlView.setId(R.id.gl_map_view);
+        mMapGlView.getMapDrawing().setOnDrawTimeChangeListener(this);
+        mMapGlView.getMapDrawing().setOnIndicesCountChangeListener(this);
     }
 
 
@@ -39,6 +55,8 @@ public class MapFragment
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
         mMapRelativeLayout = (RelativeLayout) view.findViewById(R.id.rl_map);
+        mDrawTimeView = (TextView) view.findViewById(R.id.draw_time);
+        mTrianglesView = (TextView) view.findViewById(R.id.triangles_count);
 
         if (mMapRelativeLayout != null) {
             mMapRelativeLayout.addView(mMapGlView, 0, new RelativeLayout.LayoutParams(
@@ -56,6 +74,22 @@ public class MapFragment
                 // TODO:
             }
         });
+
+        mHandler = new Handler()
+        {
+            public void handleMessage(Message msg)
+            {
+                switch (msg.what) {
+                    case DRAW_TIME:
+                        mDrawTimeView.setText(" " + msg.obj.toString() + " ");
+                        break;
+
+                    case INDEXES_COUNT:
+                        mTrianglesView.setText(" " + msg.obj.toString() + " ");
+                        break;
+                }
+            }
+        };
 
         return view;
     }
@@ -87,5 +121,21 @@ public class MapFragment
     {
         super.onResume();
         mMapGlView.onResume();
+    }
+
+
+    @Override
+    public void onDrawTimeChange(int drawTime)
+    {
+        Message msg = mHandler.obtainMessage(DRAW_TIME, drawTime);
+        msg.sendToTarget();
+    }
+
+
+    @Override
+    public void onIndicesCountChange(String indicesCount)
+    {
+        Message msg = mHandler.obtainMessage(INDEXES_COUNT, indicesCount);
+        msg.sendToTarget();
     }
 }

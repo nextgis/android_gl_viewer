@@ -127,7 +127,7 @@ public class MapFragment
 
 
     @Override
-    public void onDrawTimeChange(int drawTime)
+    public void onDrawTimeChange(String drawTime)
     {
         Message msg = mHandler.obtainMessage(DRAW_TIME, drawTime);
         msg.sendToTarget();

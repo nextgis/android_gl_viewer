@@ -1,6 +1,7 @@
 package com.nextgis.store.map;
 
 import android.graphics.PointF;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -301,11 +302,12 @@ public class MapDrawing
                 }
 
                 if (complete > 0.999) {
-                    MessageStruct struct = new MessageStruct();
-                    struct.mSystemTime = System.currentTimeMillis();
-                    struct.mFeatureCount = Integer.valueOf(message);
+                    Bundle bundle = new Bundle();
+                    bundle.putLong("time", System.currentTimeMillis());
+                    bundle.putInt("count", Integer.valueOf(message));
 
-                    Message msg = mHandler.obtainMessage(DRAW_MSG, struct);
+                    Message msg = mHandler.obtainMessage(DRAW_MSG);
+                    msg.setData(bundle);
                     msg.sendToTarget();
                 }
 
@@ -323,11 +325,12 @@ public class MapDrawing
             {
                 switch (msg.what) {
                     case DRAW_MSG:
-                        MessageStruct struct = (MessageStruct) msg.obj;
-                        if (-1 < struct.mFeatureCount) {
-                            mFeatureCount = struct.mFeatureCount;
+                        Bundle bundle = msg.getData();
+                        int count = bundle.getInt("count");
+                        if (-1 < count) {
+                            mFeatureCount = count;
                         }
-                        mDrawTime = struct.mSystemTime - mDrawTime;
+                        mDrawTime = bundle.getLong("time") - mDrawTime;
 
                         Log.d(Constants.TAG, "Native map draw time: " + mDrawTime);
                         onDrawStop();
@@ -342,11 +345,11 @@ public class MapDrawing
     {
         if (mNgsDebugMode) {
             if (null != mOnDrawTimeChangeListener) {
-                mOnDrawTimeChangeListener.onDrawTimeChange(0);
+                mOnDrawTimeChangeListener.onDrawTimeChange("*****");
             }
 
             if (null != mOnIndicesCountChangeListener) {
-                mOnIndicesCountChangeListener.onIndicesCountChange("0");
+                mOnIndicesCountChangeListener.onIndicesCountChange("*****");
             }
         }
     }
@@ -355,8 +358,8 @@ public class MapDrawing
     public void onDrawStop()
     {
         if (mNgsDebugMode) {
-            if (null != mOnDrawTimeChangeListener) {
-                mOnDrawTimeChangeListener.onDrawTimeChange((int) mDrawTime);
+            if (null != mOnDrawTimeChangeListener && mDrawTime > -1 && mDrawTime < 10000000) {
+                mOnDrawTimeChangeListener.onDrawTimeChange("" + mDrawTime);
             }
 
             if (null != mOnIndicesCountChangeListener) {
@@ -399,7 +402,7 @@ public class MapDrawing
 
     public interface OnDrawTimeChangeListener
     {
-        void onDrawTimeChange(int drawTime);
+        void onDrawTimeChange(String drawTime);
     }
 
 
@@ -412,12 +415,5 @@ public class MapDrawing
     public interface OnIndicesCountChangeListener
     {
         void onIndicesCountChange(String indicesCount);
-    }
-
-
-    protected class MessageStruct
-    {
-        long mSystemTime;
-        int  mFeatureCount;
     }
 }

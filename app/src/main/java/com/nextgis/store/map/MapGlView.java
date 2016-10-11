@@ -755,6 +755,7 @@ public class MapGlView
                     break;
 
                 case MotionEvent.ACTION_UP:
+                    mDrawingState = DRAW_STATE_panning;
                     panStop();
                     break;
 

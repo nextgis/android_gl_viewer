@@ -41,8 +41,6 @@ public class MapFragment
 
         mMapGlView = new MapGlView(mActivity);
         mMapGlView.setId(R.id.gl_map_view);
-        mMapGlView.getMapDrawing().setOnDrawTimeChangeListener(this);
-        mMapGlView.getMapDrawing().setOnIndicesCountChangeListener(this);
     }
 
 
@@ -111,6 +109,8 @@ public class MapFragment
     @Override
     public void onPause()
     {
+        mMapGlView.getMapDrawing().setOnDrawTimeChangeListener(null);
+        mMapGlView.getMapDrawing().setOnIndicesCountChangeListener(null);
         mMapGlView.onPause();
         super.onPause();
     }
@@ -121,6 +121,8 @@ public class MapFragment
     {
         super.onResume();
         mMapGlView.onResume();
+        mMapGlView.getMapDrawing().setOnDrawTimeChangeListener(this);
+        mMapGlView.getMapDrawing().setOnIndicesCountChangeListener(this);
     }
 
 

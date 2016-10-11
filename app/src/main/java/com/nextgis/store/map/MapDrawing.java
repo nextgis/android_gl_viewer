@@ -321,6 +321,12 @@ public class MapDrawing
     }
 
 
+    public void onResume()
+    {
+        // TODO: onResume()
+    }
+
+
     public void setOnRequestRenderListener(OnRequestRenderListener listener)
     {
         mOnRequestRenderListener = listener;

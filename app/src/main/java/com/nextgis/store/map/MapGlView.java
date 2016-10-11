@@ -139,7 +139,7 @@ public class MapGlView
     @Override
     public void onPause()
     {
-        setListeners(false);
+        mMapDrawing.setOnRequestRenderListener(null);
         mMapDrawing.onPause();
         super.onPause();
     }
@@ -149,17 +149,8 @@ public class MapGlView
     public void onResume()
     {
         super.onResume();
-        setListeners(true);
-    }
-
-
-    protected void setListeners(boolean setIt)
-    {
-        if (setIt) {
-            mMapDrawing.setOnRequestRenderListener(this);
-        } else {
-            mMapDrawing.setOnRequestRenderListener(null);
-        }
+        mMapDrawing.onResume();
+        mMapDrawing.setOnRequestRenderListener(this);
     }
 
 

@@ -30,9 +30,10 @@ public class MapDrawing
     protected PointF mCenter;
     protected int mYOrient = 0;
 
-    protected int    mDrawState;
-    protected double mDrawComplete;
-    protected long   mDrawTime;
+    protected int     mDrawState;
+    protected double  mDrawComplete;
+    protected long    mDrawTime;
+    protected Integer mFeatureCount;
 
     protected ProgressCallback             mDrawCallback;
     protected OnRequestRenderListener      mOnRequestRenderListener;
@@ -50,6 +51,8 @@ public class MapDrawing
         mCenter = new PointF();
         mDrawCallback = createDrawCallback();
         mNgsDebugMode = (Api.ngsGetOptions() & Options.OPT_DEBUGMODE) != 0;
+        mDrawTime = 0;
+        mFeatureCount = 0;
     }
 
 
@@ -287,30 +290,49 @@ public class MapDrawing
                 if (complete - mDrawComplete > 0.045) { // each 5% redraw
                     mDrawComplete = complete;
                     requestRender();
-
-                    if (mNgsDebugMode && null != mOnIndicesCountChangeListener) {
-                        mOnIndicesCountChangeListener.onIndicesCountChange(message);
-                    }
                 }
 
                 if (complete > 0.999) {
                     mDrawTime = System.currentTimeMillis() - mDrawTime;
                     Log.d(Constants.TAG, "Native map draw time: " + mDrawTime);
-
-                    if (mNgsDebugMode) {
-                        if (null != mOnDrawTimeChangeListener && mDrawTime < 10000000) {
-                            mOnDrawTimeChangeListener.onDrawTimeChange((int) mDrawTime);
-                        }
-
-                        if (null != mOnIndicesCountChangeListener) {
-                            mOnIndicesCountChangeListener.onIndicesCountChange(message);
-                        }
-                    }
+                    onDrawStop(message);
                 }
 
                 return 1;
             }
         };
+    }
+
+
+    public void onDrawStart()
+    {
+        if (mNgsDebugMode) {
+            if (null != mOnDrawTimeChangeListener) {
+                mOnDrawTimeChangeListener.onDrawTimeChange(0);
+            }
+
+            if (null != mOnIndicesCountChangeListener) {
+                mOnIndicesCountChangeListener.onIndicesCountChange("0");
+            }
+        }
+    }
+
+
+    public void onDrawStop(String indicesCount)
+    {
+        if (mNgsDebugMode) {
+            if (null != mOnDrawTimeChangeListener && mDrawTime < 10000000) {
+                mOnDrawTimeChangeListener.onDrawTimeChange((int) mDrawTime);
+            }
+
+            if (null != mOnIndicesCountChangeListener) {
+                int count = Integer.valueOf(indicesCount);
+                if (0 != count) {
+                    mFeatureCount = count;
+                }
+                mOnIndicesCountChangeListener.onIndicesCountChange(mFeatureCount.toString());
+            }
+        }
     }
 
 

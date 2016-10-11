@@ -597,6 +597,7 @@ public class MapGlView
         }
 
         mDrawingState = DRAW_STATE_panning;
+        mMapDrawing.onDrawStart();
 
         mStartDragLocation.set(e.getX(), e.getY());
         mCurrentDragOffset.set(0, 0);
@@ -635,6 +636,8 @@ public class MapGlView
         }
 
         mDrawingState = DRAW_STATE_zooming;
+        mMapDrawing.onDrawStart();
+
         mCurrentSpan = scaleGestureDetector.getCurrentSpan();
         mCurrentFocusLocation.set(
                 scaleGestureDetector.getFocusX(), scaleGestureDetector.getFocusY());

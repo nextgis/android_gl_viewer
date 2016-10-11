@@ -790,6 +790,9 @@ public class MapGlView
         mScroller.forceFinished(true);
         mScroller.fling((int) x, (int) y, (int) -velocityX, (int) -velocityY, 0,
                         mMapDrawing.getWidth(), 0, mMapDrawing.getHeight());
+
+        mDrawingState = DRAW_STATE_panning;
+        panStop();
         return true;
     }
 

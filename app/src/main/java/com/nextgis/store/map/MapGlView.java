@@ -782,9 +782,9 @@ public class MapGlView
             //Log.d(Constants.TAG, "=== onFling, false, mDrawingState: " + mDrawingState);
             return false;
         }
-
         //Log.d(Constants.TAG, "=== onFling, true, mDrawingState: " + mDrawingState);
-        mDrawingState = DRAW_STATE_panning_fling;
+
+        //mDrawingState = DRAW_STATE_panning_fling;
         float x = mCurrentDragOffset.x;
         float y = mCurrentDragOffset.y;
 

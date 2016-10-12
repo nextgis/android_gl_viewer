@@ -48,13 +48,11 @@ public class MapGlView
 
     protected static final boolean DEBUG = false;
 
-    protected static final int DRAW_STATE_none              = 0;
-    protected static final int DRAW_STATE_drawing           = 1;
-    protected static final int DRAW_STATE_drawing_noclearbk = 2;
-    protected static final int DRAW_STATE_panning           = 3;
-    protected static final int DRAW_STATE_panning_fling     = 4;
-    protected static final int DRAW_STATE_zooming           = 5;
-    protected static final int DRAW_STATE_resizing          = 6;
+    protected static final int DRAW_STATE_none           = 0;
+    protected static final int DRAW_STATE_drawing_normal = 1;
+    protected static final int DRAW_STATE_panning        = 3;
+    protected static final int DRAW_STATE_panning_fling  = 4;
+    protected static final int DRAW_STATE_zooming        = 5;
 
     protected MainApplication mApp;
 
@@ -550,7 +548,6 @@ public class MapGlView
                 int width,
                 int height)
         {
-            mDrawingState = DRAW_STATE_resizing;
             mMapDrawing.setSize(width, height);
         }
 
@@ -558,6 +555,7 @@ public class MapGlView
         @Override
         public void onDrawFrame(GL10 gl)
         {
+            //Log.d(Constants.TAG, "+++ onDrawFrame");
             mMapDrawing.draw();
         }
     }
@@ -572,6 +570,7 @@ public class MapGlView
 
     public void requestRender(int drawState)
     {
+        //Log.d(Constants.TAG, "+++ requestRender, drawState: " + drawState);
         mMapDrawing.setDrawState(drawState);
         super.requestRender();
     }
@@ -580,18 +579,13 @@ public class MapGlView
     @Override
     public void onRequestRender()
     {
-        mDrawingState = DRAW_STATE_drawing;
+        //Log.d(Constants.TAG, "+++ onRequestRender, mDrawingState: " + mDrawingState);
         super.requestRender();
     }
 
 
     public void panStart(final MotionEvent e)
     {
-//        if (mDrawingState == DRAW_STATE_zooming || mDrawingState == DRAW_STATE_panning ||
-//                mDrawingState == DRAW_STATE_panning_fling) {
-//            return;
-//        }
-
         if (mDrawingState == DRAW_STATE_panning) {
             return;
         }
@@ -625,6 +619,7 @@ public class MapGlView
     {
         if (mDrawingState == DRAW_STATE_panning) {
             requestRender(DrawState.DS_NORMAL);
+            mDrawingState = DRAW_STATE_drawing_normal;
         }
     }
 
@@ -673,6 +668,7 @@ public class MapGlView
     {
         if (mDrawingState == DRAW_STATE_zooming) {
             requestRender(DrawState.DS_NORMAL);
+            mDrawingState = DRAW_STATE_drawing_normal;
         }
     }
 
@@ -680,7 +676,9 @@ public class MapGlView
     @Override
     public boolean onDoubleTap(MotionEvent e)
     {
-        mDrawingState = DRAW_STATE_zooming;
+        //Log.d(Constants.TAG, "=== onDoubleTap, true, mDrawingState: " + mDrawingState);
+
+        //mDrawingState = DRAW_STATE_zooming;
         mCurrentFocusLocation.set(e.getX(), e.getY());
         mScaleFactor = 2.0;
 
@@ -690,48 +688,10 @@ public class MapGlView
 //        mCurrentFocusOffset.set((float) offX, (float) offY);
 
         mMapDrawing.scale(mScaleFactor, mCurrentFocusLocation.x, mCurrentFocusLocation.y);
+
         requestRender(DrawState.DS_NORMAL);
-
+        mDrawingState = DRAW_STATE_drawing_normal;
         return true;
-    }
-
-
-    @Override
-    public boolean onScroll(
-            MotionEvent event1,
-            MotionEvent event2,
-            float distanceX,
-            float distanceY)
-    {
-        if (event2.getPointerCount() > 1) {
-            return false;
-        }
-
-        panStart(event1);
-        panMoveTo(event2, distanceX, distanceY);
-        return true;
-    }
-
-
-    @Override
-    public void computeScroll()
-    {
-        super.computeScroll();
-        if (mDrawingState == DRAW_STATE_panning_fling) {
-            if (mScroller.computeScrollOffset()) {
-                if (mScroller.isFinished()) {
-                    mDrawingState = DRAW_STATE_panning;
-                    panStop();
-                } else {
-                    float x = mScroller.getCurrX();
-                    float y = mScroller.getCurrY();
-                    mCurrentDragOffset.set(x, y);
-                }
-            } else if (mScroller.isFinished()) {
-                mDrawingState = DRAW_STATE_panning;
-                panStop();
-            }
-        }
     }
 
 
@@ -744,26 +704,69 @@ public class MapGlView
         if (!mGestureDetector.onTouchEvent(event)) {
             // TODO: get action can be more complicated:
             // TODO: if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN)
-            switch (event.getAction()) {
+
+            int action = event.getAction();
+
+            switch (action) {
                 case MotionEvent.ACTION_DOWN:
+                    //Log.d(Constants.TAG,
+                    //      "=== onTouchEvent, ACTION_DOWN, false, mDrawingState:" + mDrawingState);
                     if (!mScroller.isFinished()) {
+                        //Log.d(Constants.TAG,
+                        //      "=== onTouchEvent, ACTION_DOWN, false, mDrawingState:" + mDrawingState + "!mScroller.isFinished()");
                         mScroller.forceFinished(true);
                     }
-                    break;
+                    return false;
 
                 case MotionEvent.ACTION_MOVE:
-                    break;
+                    //Log.d(Constants.TAG,
+                    //      "=== onTouchEvent, ACTION_MOVE, false, mDrawingState:" + mDrawingState);
+                    return false;
 
                 case MotionEvent.ACTION_UP:
-                    mDrawingState = DRAW_STATE_panning;
+                    //Log.d(Constants.TAG, "onTouchEvent, ACTION_UP, true, mDrawingState:" + mDrawingState);
                     panStop();
-                    break;
+                    return true;
 
                 default:
-                    break;
+                    if ((action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
+                        //Log.d(
+                        //        Constants.TAG,
+                        //        "=== onTouchEvent, ACTION_MASK & ACTION_UP, true, mDrawingState:"
+                        //                + mDrawingState);
+                        panStop();
+                        return true;
+                    }
+                    //Log.d(Constants.TAG,
+                    //      "=== onTouchEvent, default, false, action: " + action + ", mDrawingState:"
+                    //              + mDrawingState);
+                    return false;
             }
         }
 
+        //Log.d(
+        //        Constants.TAG,
+        //        "=== onTouchEvent, mGestureDetector.onTouchEvent(), true, mDrawingState:"
+        //                + mDrawingState);
+        return true;
+    }
+
+
+    @Override
+    public boolean onScroll(
+            MotionEvent event1,
+            MotionEvent event2,
+            float distanceX,
+            float distanceY)
+    {
+        if (event2.getPointerCount() > 1) {
+            //Log.d(Constants.TAG, "=== onScroll, false, mDrawingState: " + mDrawingState);
+            return false;
+        }
+
+        //Log.d(Constants.TAG, "=== onScroll, true, mDrawingState: " + mDrawingState);
+        panStart(event1);
+        panMoveTo(event2, distanceX, distanceY);
         return true;
     }
 
@@ -775,15 +778,12 @@ public class MapGlView
             float velocityX,
             float velocityY)
     {
-//        if (mDrawingState == DRAW_STATE_zooming || mDrawingState == DRAW_STATE_drawing_noclearbk ||
-//                mDrawingState == DRAW_STATE_drawing) {
-//            return false;
-//        }
-
         if (mDrawingState == DRAW_STATE_zooming) {
+            //Log.d(Constants.TAG, "=== onFling, false, mDrawingState: " + mDrawingState);
             return false;
         }
 
+        //Log.d(Constants.TAG, "=== onFling, true, mDrawingState: " + mDrawingState);
         mDrawingState = DRAW_STATE_panning_fling;
         float x = mCurrentDragOffset.x;
         float y = mCurrentDragOffset.y;
@@ -798,9 +798,33 @@ public class MapGlView
     }
 
 
+// !!! the method is never called by the user's actions
+//@Override
+//public void computeScroll()
+//{
+//    super.computeScroll();
+//    if (mDrawingState == DRAW_STATE_panning_fling) {
+//        if (mScroller.computeScrollOffset()) {
+//            if (mScroller.isFinished()) {
+//                //mDrawingState = DRAW_STATE_panning; // !!! must not be here
+//                panStop();
+//            } else {
+//                float x = mScroller.getCurrX();
+//                float y = mScroller.getCurrY();
+//                mCurrentDragOffset.set(x, y);
+//            }
+//        } else if (mScroller.isFinished()) {
+//            //mDrawingState = DRAW_STATE_panning; // !!! must not be here
+//            panStop();
+//        }
+//    }
+//}
+
+
     @Override
     public boolean onScaleBegin(ScaleGestureDetector detector)
     {
+        //Log.d(Constants.TAG, "=== onScaleBegin, true, mDrawingState:" + mDrawingState);
         zoomStart(detector);
         return true;
     }
@@ -809,6 +833,7 @@ public class MapGlView
     @Override
     public boolean onScale(ScaleGestureDetector detector)
     {
+        //Log.d(Constants.TAG, "=== onScale, true, mDrawingState:" + mDrawingState);
         zoom(detector);
         return true;
     }
@@ -817,6 +842,7 @@ public class MapGlView
     @Override
     public void onScaleEnd(ScaleGestureDetector detector)
     {
+        //Log.d(Constants.TAG, "=== onScaleEnd, mDrawingState:" + mDrawingState);
         zoomStop();
     }
 
@@ -824,19 +850,22 @@ public class MapGlView
     @Override
     public boolean onDown(MotionEvent e)
     {
-        return false;
+        //Log.d(Constants.TAG, "=== onDown, true, mDrawingState:" + mDrawingState);
+        return true;
     }
 
 
     @Override
     public void onShowPress(MotionEvent e)
     {
+        //Log.d(Constants.TAG, "=== onShowPress, mDrawingState:" + mDrawingState);
     }
 
 
     @Override
     public boolean onSingleTapUp(MotionEvent e)
     {
+        //Log.d(Constants.TAG, "=== onSingleTapUp, false, mDrawingState:" + mDrawingState);
         return false;
     }
 
@@ -844,12 +873,14 @@ public class MapGlView
     @Override
     public void onLongPress(MotionEvent e)
     {
+        //Log.d(Constants.TAG, "=== onLongPress, mDrawingState:" + mDrawingState);
     }
 
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e)
     {
+        //Log.d(Constants.TAG, "=== onSingleTapConfirmed, false, mDrawingState:" + mDrawingState);
         return false;
     }
 
@@ -857,6 +888,7 @@ public class MapGlView
     @Override
     public boolean onDoubleTapEvent(MotionEvent e)
     {
+        //Log.d(Constants.TAG, "=== onDoubleTapEvent, false, mDrawingState:" + mDrawingState);
         return false;
     }
 }

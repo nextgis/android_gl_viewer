@@ -35,10 +35,13 @@ public class MapDrawing
     protected PointF mCenter;
     protected int mYOrient = 0;
 
-    protected int     mDrawState;
-    protected double  mDrawComplete;
-    protected long    mDrawTime;
-    protected Integer mFeatureCount;
+    private int    mDrawState;
+    private double mDrawComplete;
+    private long   mDrawTimeSync, mDrawTime;
+    private int mFeatureCountSync, mFeatureCount;
+    private final Object mDrawStateLock    = new Object();
+    private final Object mDrawCompleteLock = new Object();
+    private final Object mDrawTimeLock     = new Object();
 
     protected ProgressCallback             mDrawCallback;
     protected OnRequestRenderListener      mOnRequestRenderListener;
@@ -54,14 +57,14 @@ public class MapDrawing
     {
         super(mapPath);
 
-        setDrawState(DrawState.DS_REDRAW);
+        mNgsDebugMode = (Api.ngsGetOptions() & Options.OPT_DEBUGMODE) != 0;
         mCenter = new PointF();
         mDrawCallback = createDrawCallback();
-        mNgsDebugMode = (Api.ngsGetOptions() & Options.OPT_DEBUGMODE) != 0;
-        mDrawTime = 0;
-        mFeatureCount = 0;
-
+        mDrawTimeSync = mDrawTime = 0;
+        mFeatureCountSync = mFeatureCount = 0;
         mHandler = createHandler();
+
+        setDrawState(DrawState.DS_REDRAW);
     }
 
 
@@ -265,9 +268,27 @@ public class MapDrawing
 
     public void setDrawState(int drawState)
     {
-        mDrawState = drawState;
-        mDrawComplete = 0;
-        mDrawTime = System.currentTimeMillis();
+        synchronized (mDrawCompleteLock) {
+            mDrawComplete = 0;
+        }
+
+        synchronized (mDrawStateLock) {
+            mDrawState = drawState;
+
+            switch (drawState) {
+                case DrawState.DS_REDRAW:
+                case DrawState.DS_NORMAL:
+                    synchronized (mDrawTimeLock) {
+                        mDrawTimeSync = System.currentTimeMillis();
+                    }
+                    break;
+
+                case DrawState.DS_PRESERVED:
+                    break;
+            }
+
+            //Log.d(Constants.TAG, "+++ setDrawState, drawState: " + mDrawState);
+        }
     }
 
 
@@ -281,8 +302,14 @@ public class MapDrawing
 
     public void draw()
     {
-        Api.ngsMapDraw(mMapId, mDrawState, mDrawCallback);
-        mDrawState = DrawState.DS_PRESERVED; // draw from cache on display update
+        synchronized (mDrawStateLock) {
+            //Log.d(Constants.TAG, "+++ draw 01, mMapId: " + mMapId + ", mDrawState: " + mDrawState);
+
+            Api.ngsMapDraw(mMapId, mDrawState, mDrawCallback);
+            mDrawState = DrawState.DS_PRESERVED; // draw from cache on display update
+
+            //Log.d(Constants.TAG, "+++ draw 02, mMapId: " + mMapId + ", mDrawState: " + mDrawState);
+        }
     }
 
 
@@ -296,15 +323,33 @@ public class MapDrawing
                     double complete,
                     String message)
             {
-                if (complete - mDrawComplete > 0.045) { // each 5% redraw
-                    mDrawComplete = complete;
+                boolean requested = false;
+                synchronized (mDrawCompleteLock) {
+                    if (complete - mDrawComplete > 0.045) { // each 5% redraw
+                        mDrawComplete = complete;
+                        requested = true;
+                    }
+                }
+                if (requested) {
                     requestRender();
                 }
 
-                if (complete > 0.999) {
+                if (complete > 1.999) {
+                    long time;
+                    synchronized (mDrawTimeLock) {
+                        mDrawTimeSync = System.currentTimeMillis() - mDrawTimeSync;
+                        time = mDrawTimeSync;
+                        Log.d(Constants.TAG, "Native map draw time: " + time);
+                    }
+
+                    int count = Integer.valueOf(message);
+                    if (-1 < count) {
+                        mFeatureCountSync = count;
+                    }
+
                     Bundle bundle = new Bundle();
-                    bundle.putLong("time", System.currentTimeMillis());
-                    bundle.putInt("count", Integer.valueOf(message));
+                    bundle.putLong("time", time);
+                    bundle.putInt("count", mFeatureCountSync);
 
                     Message msg = mHandler.obtainMessage(DRAW_MSG);
                     msg.setData(bundle);
@@ -326,13 +371,9 @@ public class MapDrawing
                 switch (msg.what) {
                     case DRAW_MSG:
                         Bundle bundle = msg.getData();
-                        int count = bundle.getInt("count");
-                        if (-1 < count) {
-                            mFeatureCount = count;
-                        }
-                        mDrawTime = bundle.getLong("time") - mDrawTime;
+                        mDrawTime = bundle.getLong("time");
+                        mFeatureCount = bundle.getInt("count");
 
-                        Log.d(Constants.TAG, "Native map draw time: " + mDrawTime);
                         onDrawStop();
                         break;
                 }
@@ -358,12 +399,12 @@ public class MapDrawing
     public void onDrawStop()
     {
         if (mNgsDebugMode) {
-            if (null != mOnDrawTimeChangeListener && mDrawTime > -1 && mDrawTime < 10000000) {
+            if (null != mOnDrawTimeChangeListener) {
                 mOnDrawTimeChangeListener.onDrawTimeChange("" + mDrawTime);
             }
 
             if (null != mOnIndicesCountChangeListener) {
-                mOnIndicesCountChangeListener.onIndicesCountChange(mFeatureCount.toString());
+                mOnIndicesCountChangeListener.onIndicesCountChange("" + mFeatureCount);
             }
         }
     }

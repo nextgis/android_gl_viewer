@@ -46,7 +46,7 @@ public class MapDrawing
     protected ProgressCallback             mDrawCallback;
     protected OnRequestRenderListener      mOnRequestRenderListener;
     protected OnDrawTimeChangeListener     mOnDrawTimeChangeListener;
-    protected OnIndicesCountChangeListener mOnIndicesCountChangeListener;
+    protected OnFeatureCountChangeListener mOnFeatureCountChangeListener;
 
     protected boolean mNgsDebugMode;
 
@@ -386,11 +386,11 @@ public class MapDrawing
     {
         if (mNgsDebugMode) {
             if (null != mOnDrawTimeChangeListener) {
-                mOnDrawTimeChangeListener.onDrawTimeChange("*****");
+                mOnDrawTimeChangeListener.onDrawTimeChange(null);
             }
 
-            if (null != mOnIndicesCountChangeListener) {
-                mOnIndicesCountChangeListener.onIndicesCountChange("*****");
+            if (null != mOnFeatureCountChangeListener) {
+                mOnFeatureCountChangeListener.onFeatureCountChange(null);
             }
         }
     }
@@ -400,11 +400,11 @@ public class MapDrawing
     {
         if (mNgsDebugMode) {
             if (null != mOnDrawTimeChangeListener) {
-                mOnDrawTimeChangeListener.onDrawTimeChange("" + mDrawTime);
+                mOnDrawTimeChangeListener.onDrawTimeChange(mDrawTime);
             }
 
-            if (null != mOnIndicesCountChangeListener) {
-                mOnIndicesCountChangeListener.onIndicesCountChange("" + mFeatureCount);
+            if (null != mOnFeatureCountChangeListener) {
+                mOnFeatureCountChangeListener.onFeatureCountChange(mFeatureCount);
             }
         }
     }
@@ -443,18 +443,18 @@ public class MapDrawing
 
     public interface OnDrawTimeChangeListener
     {
-        void onDrawTimeChange(String drawTime);
+        void onDrawTimeChange(Long drawTime);
     }
 
 
-    public void setOnIndicesCountChangeListener(OnIndicesCountChangeListener listener)
+    public void setOnFeatureCountChangeListener(OnFeatureCountChangeListener listener)
     {
-        mOnIndicesCountChangeListener = listener;
+        mOnFeatureCountChangeListener = listener;
     }
 
 
-    public interface OnIndicesCountChangeListener
+    public interface OnFeatureCountChangeListener
     {
-        void onIndicesCountChange(String indicesCount);
+        void onFeatureCountChange(Integer featureCount);
     }
 }

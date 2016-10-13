@@ -61,11 +61,11 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textColor="#ffffffcc"
-                    android:text="@string/triangles_count"
+                    android:text="@string/feature_count"
                     />
 
             <TextView
-                    android:id="@+id/triangles_count"
+                    android:id="@+id/feature_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"

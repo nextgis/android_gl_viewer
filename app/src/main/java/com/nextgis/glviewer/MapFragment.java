@@ -1,7 +1,5 @@
 package com.nextgis.glviewer;
 
-import android.os.Handler;
-import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -17,19 +15,16 @@ import com.nextgis.store.map.MapGlView;
 public class MapFragment
         extends Fragment
         implements MapDrawing.OnDrawTimeChangeListener,
-                   MapDrawing.OnIndicesCountChangeListener
+                   MapDrawing.OnFeatureCountChangeListener
 
 {
-    protected final static int DRAW_TIME     = 0;
-    protected final static int INDEXES_COUNT = 1;
+    protected static final String WAIT_STRING = "*****";
 
     protected MainActivity   mActivity;
     protected MapGlView      mMapGlView;
     protected RelativeLayout mMapRelativeLayout;
     protected TextView       mDrawTimeView;
-    protected TextView       mTrianglesView;
-
-    protected static Handler mHandler;
+    protected TextView       mFeatureCountView;
 
 
     @Override
@@ -54,7 +49,7 @@ public class MapFragment
 
         mMapRelativeLayout = (RelativeLayout) view.findViewById(R.id.rl_map);
         mDrawTimeView = (TextView) view.findViewById(R.id.draw_time);
-        mTrianglesView = (TextView) view.findViewById(R.id.triangles_count);
+        mFeatureCountView = (TextView) view.findViewById(R.id.feature_count);
 
         if (mMapRelativeLayout != null) {
             mMapRelativeLayout.addView(mMapGlView, 0, new RelativeLayout.LayoutParams(
@@ -72,22 +67,6 @@ public class MapFragment
                 // TODO:
             }
         });
-
-        mHandler = new Handler()
-        {
-            public void handleMessage(Message msg)
-            {
-                switch (msg.what) {
-                    case DRAW_TIME:
-                        mDrawTimeView.setText(" " + msg.obj.toString() + " ");
-                        break;
-
-                    case INDEXES_COUNT:
-                        mTrianglesView.setText(" " + msg.obj.toString() + " ");
-                        break;
-                }
-            }
-        };
 
         return view;
     }
@@ -110,7 +89,7 @@ public class MapFragment
     public void onPause()
     {
         mMapGlView.getMapDrawing().setOnDrawTimeChangeListener(null);
-        mMapGlView.getMapDrawing().setOnIndicesCountChangeListener(null);
+        mMapGlView.getMapDrawing().setOnFeatureCountChangeListener(null);
         mMapGlView.onPause();
         super.onPause();
     }
@@ -122,22 +101,20 @@ public class MapFragment
         super.onResume();
         mMapGlView.onResume();
         mMapGlView.getMapDrawing().setOnDrawTimeChangeListener(this);
-        mMapGlView.getMapDrawing().setOnIndicesCountChangeListener(this);
+        mMapGlView.getMapDrawing().setOnFeatureCountChangeListener(this);
     }
 
 
     @Override
-    public void onDrawTimeChange(String drawTime)
+    public void onDrawTimeChange(Long drawTime)
     {
-        Message msg = mHandler.obtainMessage(DRAW_TIME, drawTime);
-        msg.sendToTarget();
+        mDrawTimeView.setText(" " + (null == drawTime ? WAIT_STRING : drawTime) + " ");
     }
 
 
     @Override
-    public void onIndicesCountChange(String indicesCount)
+    public void onFeatureCountChange(Integer featureCount)
     {
-        Message msg = mHandler.obtainMessage(INDEXES_COUNT, indicesCount);
-        msg.sendToTarget();
+        mFeatureCountView.setText(" " + (null == featureCount ? WAIT_STRING : featureCount) + " ");
     }
 }

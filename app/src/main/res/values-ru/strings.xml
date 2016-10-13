@@ -2,5 +2,5 @@
     <string name="app_name">NextGIS Mobile v3</string>
     <string name="action_settings">Настройки</string>
     <string name="draw_time">Время прорисовки (мс): </string>
-    <string name="triangles_count">Количество объектов: </string>
+    <string name="feature_count">Количество объектов: </string>
 </resources>

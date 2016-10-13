@@ -11,6 +11,10 @@ import android.widget.TextView;
 import com.nextgis.store.map.MapDrawing;
 import com.nextgis.store.map.MapGlView;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 
 public class MapFragment
         extends Fragment
@@ -26,6 +30,9 @@ public class MapFragment
     protected TextView       mDrawTimeView;
     protected TextView       mFeatureCountView;
 
+    protected DecimalFormat mTimeFormat;
+    protected DecimalFormat mCountFormat;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -36,6 +43,24 @@ public class MapFragment
 
         mMapGlView = new MapGlView(mActivity);
         mMapGlView.setId(R.id.gl_map_view);
+
+        NumberFormat f = NumberFormat.getInstance(Locale.getDefault());
+        mTimeFormat = null;
+        if (f instanceof DecimalFormat) {
+            mTimeFormat = (DecimalFormat) f;
+            mTimeFormat.setGroupingUsed(true);
+            mTimeFormat.setDecimalSeparatorAlwaysShown(true);
+            mTimeFormat.setMinimumFractionDigits(3);
+            mTimeFormat.setMaximumFractionDigits(3);
+        }
+
+        f = NumberFormat.getInstance(Locale.getDefault());
+        mCountFormat = null;
+        if (f instanceof DecimalFormat) {
+            mCountFormat = (DecimalFormat) f;
+            mCountFormat.setGroupingUsed(true);
+            mCountFormat.setDecimalSeparatorAlwaysShown(false);
+        }
     }
 
 
@@ -108,13 +133,26 @@ public class MapFragment
     @Override
     public void onDrawTimeChange(Long drawTime)
     {
-        mDrawTimeView.setText(" " + (null == drawTime ? WAIT_STRING : drawTime) + " ");
+        if (null == drawTime) {
+            mDrawTimeView.setText(" " + WAIT_STRING + " ");
+            return;
+        }
+
+        float time = drawTime / 1000.0f;
+        String timeString = null != mTimeFormat ? mTimeFormat.format(time) : "" + time;
+        mDrawTimeView.setText(" " + timeString + " ");
     }
 
 
     @Override
     public void onFeatureCountChange(Integer featureCount)
     {
-        mFeatureCountView.setText(" " + (null == featureCount ? WAIT_STRING : featureCount) + " ");
+        if (null == featureCount) {
+            mFeatureCountView.setText(" " + WAIT_STRING + " ");
+            return;
+        }
+
+        String countString = null != mCountFormat ? mCountFormat.format(featureCount) : "" + featureCount;
+        mFeatureCountView.setText(" " + countString + " ");
     }
 }

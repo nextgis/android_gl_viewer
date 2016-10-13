@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">NextGIS Mobile v3</string>
     <string name="action_settings">Settings</string>
-    <string name="draw_time">Draw time (ms): </string>
+    <string name="draw_time">Draw time (sec): </string>
     <string name="feature_count">Feature count: </string>
 </resources>

@@ -679,6 +679,7 @@ public class MapGlView
         //Log.d(Constants.TAG, "=== onDoubleTap, true, mDrawingState: " + mDrawingState);
 
         //mDrawingState = DRAW_STATE_zooming;
+        mMapDrawing.onDrawStart();
         mCurrentFocusLocation.set(e.getX(), e.getY());
         mScaleFactor = 2.0;
 

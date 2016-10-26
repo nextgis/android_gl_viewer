@@ -76,6 +76,8 @@ android {
 //                        "-DSKIP_GIT_PULL=TRUE",
 //                        "-DSTRIP_NGS_LIBS=TRUE",
 
+                        "-DEXT_DOWNLOAD_DIR=${projectDir}/.externalNativeBuild/third-party-src",
+
                         //"-DANDROID_PLATFORM=android-9", // ${getNdkPlatformLevel(abi)}
 // We could not specify ANDROID_PLATFORM:
 // From Android Studio 2.2 Preview 5 (July 8, 2016) report:

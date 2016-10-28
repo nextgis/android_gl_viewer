@@ -7,7 +7,7 @@ android {
     buildToolsVersion "24.0.2"
     defaultConfig {
         applicationId "com.nextgis.glviewer"
-        minSdkVersion 9
+        minSdkVersion 13
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
@@ -31,6 +31,7 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.android.support:design:24.2.1'
+//    compile 'testfairy:testfairy-android-sdk:1.+@aar'
     testCompile 'junit:junit:4.12'
 }
 

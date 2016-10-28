@@ -6,6 +6,7 @@ import android.util.Log;
 import com.nextgis.ngsandroid.NgsAndroidJni;
 import com.nextgis.store.bindings.Api;
 import com.nextgis.store.bindings.Options;
+//import com.testfairy.TestFairy;
 
 import java.io.File;
 
@@ -17,6 +18,8 @@ public class MainApplication
     public void onCreate()
     {
         super.onCreate();
+
+//        TestFairy.begin(this, "1ff0bcca6efd0ec1280a02e0276e89ecc7293d27");
 
         NgsAndroidJni.initLogger();
         Log.d(Constants.TAG, "NGS version: " + Api.ngsGetVersionString(null));
@@ -64,7 +67,7 @@ public class MainApplication
     public void onLowMemory()
     {
         // TODO: ngsOnLowMemory
-//        Api.ngsOnLowMemory();
+        Api.ngsOnLowMemory();
         super.onLowMemory();
     }
 }

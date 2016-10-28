@@ -67,7 +67,7 @@ public class MainApplication
     public void onLowMemory()
     {
         // TODO: ngsOnLowMemory
-        Api.ngsOnLowMemory();
+//        Api.ngsOnLowMemory();
         super.onLowMemory();
     }
 }

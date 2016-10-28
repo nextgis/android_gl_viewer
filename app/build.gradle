@@ -42,12 +42,28 @@ dependencies {
 // https://developer.android.com/ndk/guides/cmake.html#variables
 // https://developer.android.com/ndk/guides/abis.html#sa
 
+// Waiting for fix: https://code.google.com/p/android/issues/detail?id=52962
+
+// For Build -- Generate Signed APK:
+// defaultPublishConfig "release" (the default value)
+// buildConfig = android.defaultPublishConfig.toString()
+
+// For Build -- Make Project
+// defaultPublishConfig "release" (the default value)
+// buildConfig = "debug"
+
+// OR (for the debug of the native code)
+// defaultPublishConfig "debug"
+// buildConfig = android.defaultPublishConfig.toString()
+
 android {
 //    defaultPublishConfig "debug" // uncomment it for the debug of the native code
 }
 
-def String buildConfig = android.defaultPublishConfig.substring(0, 1).toUpperCase() +
-        android.defaultPublishConfig.substring(1, android.defaultPublishConfig.length())
+def String buildConfig = android.defaultPublishConfig.toString()
+//def String buildConfig = "debug"
+def String buildConfigUpper = buildConfig.substring(0, 1).toUpperCase() +
+        buildConfig.substring(1, buildConfig.length())
 
 android {
 // From Android Studio 2.2 Preview 6 (July 22, 2016) report:
@@ -120,7 +136,7 @@ android {
         }
     }
 
-    def String genSrcJavaDir = "${projectDir}/.externalNativeBuild/cmake/${defaultPublishConfig}" +
+    def String genSrcJavaDir = "${projectDir}/.externalNativeBuild/cmake/${buildConfig}" +
             "/${cmAndroidAbis.get(0)}/libngstoreapi/libngstore/bindings"
 
     task cmCopyJSources(type: Copy) {
@@ -138,7 +154,7 @@ android {
         // TODO: set from buildType
         // externalNativeBuildDebug is before externalNativeBuildRelease
         // if externalNativeBuildDebug is enabled then externalNativeBuildDebug else externalNativeBuildRelease
-        tasks.findAll { task -> task.name.equals("externalNativeBuildDebug") }
+        tasks.findAll { task -> task.name.equals("externalNativeBuild${buildConfigUpper}") }
     }
 
 // TODO:
@@ -152,7 +168,7 @@ android {
 //    clean.dependsOn androidAbis.collect { androidAbi -> "cleanNative-${androidAbi}" }
 }
 
-def String dependedTask = "compile${buildConfig}JavaWithJavac"
+def String dependedTask = "compile${buildConfigUpper}JavaWithJavac"
 
 tasks.all {
     task ->

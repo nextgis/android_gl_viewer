@@ -67,6 +67,7 @@ public class MainApplication
     public void onLowMemory()
     {
         // TODO: ngsOnLowMemory
+        Log.d(Constants.TAG, "onLowMemory() is fired");
 //        Api.ngsOnLowMemory();
         super.onLowMemory();
     }

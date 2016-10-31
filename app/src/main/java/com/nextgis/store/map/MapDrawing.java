@@ -2,6 +2,7 @@ package com.nextgis.store.map;
 
 import android.graphics.PointF;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -303,12 +304,28 @@ public class MapDrawing
     public void draw()
     {
         synchronized (mDrawStateLock) {
+            Log.d(Constants.TAG, "draw started, getNativeHeapSize(): " + Debug.getNativeHeapSize());
+            Log.d(Constants.TAG, "draw started, getNativeHeapAllocatedSize(): "
+                    + Debug.getNativeHeapAllocatedSize());
+            Log.d(
+                    Constants.TAG,
+                    "draw started, getNativeHeapFreeSize: " + Debug.getNativeHeapFreeSize());
+
             //Log.d(Constants.TAG, "+++ draw 01, mMapId: " + mMapId + ", mDrawState: " + mDrawState);
 
             Api.ngsMapDraw(mMapId, mDrawState, mDrawCallback);
             mDrawState = DrawState.DS_PRESERVED; // draw from cache on display update
 
             //Log.d(Constants.TAG, "+++ draw 02, mMapId: " + mMapId + ", mDrawState: " + mDrawState);
+
+            Log.d(
+                    Constants.TAG,
+                    "draw finished, getNativeHeapSize(): " + Debug.getNativeHeapSize());
+            Log.d(Constants.TAG, "draw finished, getNativeHeapAllocatedSize(): "
+                    + Debug.getNativeHeapAllocatedSize());
+            Log.d(
+                    Constants.TAG,
+                    "draw finished, getNativeHeapFreeSize: " + Debug.getNativeHeapFreeSize());
         }
     }
 
@@ -323,6 +340,14 @@ public class MapDrawing
                     double complete,
                     String message)
             {
+                Log.d(
+                        Constants.TAG,
+                        "ProgressCallback run, getNativeHeapSize(): " + Debug.getNativeHeapSize());
+                Log.d(Constants.TAG, "ProgressCallback run, getNativeHeapAllocatedSize(): "
+                        + Debug.getNativeHeapAllocatedSize());
+                Log.d(Constants.TAG, "ProgressCallback run, getNativeHeapFreeSize: "
+                        + Debug.getNativeHeapFreeSize());
+
                 boolean requested = false;
                 synchronized (mDrawCompleteLock) {
                     if (complete - mDrawComplete > 0.045) { // each 5% redraw

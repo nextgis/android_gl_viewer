@@ -8,6 +8,7 @@ import com.nextgis.store.bindings.LoadTaskInfo;
 import com.nextgis.store.bindings.ProgressCallback;
 
 import java.io.File;
+import java.io.IOException;
 
 
 public class DataStore
@@ -79,11 +80,19 @@ public class DataStore
 
 
     public void loadMap()
+            throws IOException
     {
 //        File sceneDir = new File(mMapPath, "scenes");
 //        File sceneFile = new File(sceneDir, "scenes.shp");
-        File sceneDir = new File(mMapPath, "orbview3_catalog");
+        File sceneDir = new File(mMapPath, "orbview3-catalog-shp");
         File sceneFile = new File(sceneDir, "orbview3_catalog.shp");
+
+        if (!sceneFile.exists()) {
+            String error = "File orbview3_catalog.shp is not exist.";
+            Log.d(Constants.TAG, error);
+            throw new IOException(error);
+        }
+
         String sceneFilePath = sceneFile.getPath();
         String filenameArray[] = sceneFile.getName().split("\\.");
         String sceneFileName = filenameArray[0];
@@ -91,7 +100,9 @@ public class DataStore
         String[] options = {"LOAD_OP=COPY", "FEATURES_SKIP=EMPTY_GEOMETRY"};
 
         if (Api.ngsDataStoreLoad(sceneFileName, sceneFilePath, "", options, mLoadCallback) == 0) {
-            Log.d(Constants.TAG, "Error: Load scene failed");
+            String error = "Error: Load scene failed";
+            Log.d(Constants.TAG, error);
+            throw new IOException(error);
         }
     }
 

@@ -10,6 +10,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.widget.Scroller;
+import android.widget.Toast;
 import com.nextgis.glviewer.Constants;
 import com.nextgis.glviewer.MainActivity;
 import com.nextgis.glviewer.MainApplication;
@@ -22,6 +23,7 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL10;
+import java.io.IOException;
 
 
 public class MapGlView
@@ -129,7 +131,11 @@ public class MapGlView
 
         if (!mMapDrawing.openMap()) {
             mMapDrawing.createMap();
-            mMapDrawing.loadMap();
+            try {
+                mMapDrawing.loadMap();
+            } catch (IOException e) {
+                Toast.makeText(mApp, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            }
         }
     }
 

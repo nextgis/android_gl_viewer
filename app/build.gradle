@@ -3,12 +3,13 @@ import org.gradle.internal.os.OperatingSystem;
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.2"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.1"
     defaultConfig {
         applicationId "com.nextgis.glviewer"
-        minSdkVersion 13
-        targetSdkVersion 24
+//        minSdkVersion 9
+        minSdkVersion 13 // due to testfairy sdk
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -29,8 +30,8 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.android.support:design:24.2.1'
+    compile 'com.android.support:appcompat-v7:25.0.1'
+    compile 'com.android.support:design:25.0.1'
 //    compile 'testfairy:testfairy-android-sdk:1.+@aar'
     testCompile 'junit:junit:4.12'
 }

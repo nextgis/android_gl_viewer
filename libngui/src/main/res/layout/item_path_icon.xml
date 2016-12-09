@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Project:  NextGIS Mobile
   ~ Purpose:  Mobile GIS for Android.
@@ -21,17 +22,12 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<resources>
-    <string name="app_name">NextGIS UI Library</string>
-
-    <string name="folder">Folder</string>
-    <string name="formbuilder_file">FormBuilder file</string>
-    <string name="geojson_file">GeoJSON file</string>
-    <string name="zip_file">ZIP file</string>
-    <string name="unknown_file">Unknown file</string>
-    <string name="up">Up</string>
-    <string name="up_dots">..</string>
-
-    <string name="select">Select</string>
-    <string name="cancel">Cancel</string>
-</resources>
+<ImageView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/path_icon"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_gravity="center"
+        android:layout_marginRight="5dp"
+        android:background="?attr/ic_next"
+        />

@@ -254,35 +254,33 @@ public class StyledDialogFragment
             if (null != mOnPositiveClickedListener) {
                 mButtons.setVisibility(View.VISIBLE);
                 mButtonPositive.setVisibility(View.VISIBLE);
-                mButtonPositive.setOnClickListener(
-                        new View.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(View v)
-                            {
-                                if (null != mOnPositiveClickedListener) {
-                                    mOnPositiveClickedListener.onPositiveClicked();
-                                }
-                                dismiss();
-                            }
-                        });
+                mButtonPositive.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        if (null != mOnPositiveClickedListener) {
+                            mOnPositiveClickedListener.onPositiveClicked();
+                        }
+                        dismiss();
+                    }
+                });
             }
 
             if (null != mOnNegativeClickedListener) {
                 mButtons.setVisibility(View.VISIBLE);
                 mButtonNegative.setVisibility(View.VISIBLE);
-                mButtonNegative.setOnClickListener(
-                        new View.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(View v)
-                            {
-                                if (null != mOnNegativeClickedListener) {
-                                    mOnNegativeClickedListener.onNegativeClicked();
-                                }
-                                dismiss();
-                            }
-                        });
+                mButtonNegative.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        if (null != mOnNegativeClickedListener) {
+                            mOnNegativeClickedListener.onNegativeClicked();
+                        }
+                        dismiss();
+                    }
+                });
             }
         }
 
@@ -297,11 +295,13 @@ public class StyledDialogFragment
             getDialog().setOnDismissListener(null);
         }
 
-        if (mDialogBodyLayout != null)
+        if (mDialogBodyLayout != null) {
             mDialogBodyLayout.removeAllViews();
+        }
 
-        if (mDialogBodyLayoutScrolled != null)
+        if (mDialogBodyLayoutScrolled != null) {
             mDialogBodyLayoutScrolled.removeAllViews();
+        }
 
         super.onDestroyView();
     }

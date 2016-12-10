@@ -38,7 +38,6 @@ import static com.nextgis.libngui.util.ConstantsUI.*;
 // http://developer.android.com/reference/android/content/AsyncTaskLoader.html
 public class LocalResourceListLoader
         extends AsyncTaskLoader<List<LocalResourceListItem>>
-        implements LocalResourceListAdapter.OnChangePathListener
 
 {
     protected File    mPath;
@@ -247,11 +246,10 @@ public class LocalResourceListLoader
     }
 
 
-    @Override
-    public void onChangePath(File path)
-    {
-        mPath = path;
-        // Tell the loader about the change.
-        onContentChanged();
-    }
+    //@Override
+    //public void onOutChangeEvent()
+    //{
+    //   // Tell the loader about the change.
+    //    onContentChanged();
+    //}
 }

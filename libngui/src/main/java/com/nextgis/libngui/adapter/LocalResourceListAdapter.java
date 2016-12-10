@@ -47,13 +47,12 @@ public class LocalResourceListAdapter
 {
     protected PathAdapter mPathAdapter;
     protected List<LocalResourceListItem> mResources;
-    protected List<OnChangePathListener> mOnChangePathListeners;
+    protected OnChangePathListener mOnChangePathListener;
 
 
     public LocalResourceListAdapter()
     {
         super();
-        mOnChangePathListeners = new ArrayList<>();
     }
 
 
@@ -102,10 +101,8 @@ public class LocalResourceListAdapter
             mPathAdapter.setPath(path);
         }
 
-        if (null != mOnChangePathListeners) {
-            for (OnChangePathListener listener : mOnChangePathListeners) {
-                listener.onChangePath(path);
-            }
+        if (null != mOnChangePathListener) {
+            mOnChangePathListener.onChangePath(path);
         }
     }
 
@@ -257,19 +254,9 @@ public class LocalResourceListAdapter
     }
 
 
-    public void addOnChangePathListener(OnChangePathListener listener)
+    public void setOnChangePathListener(OnChangePathListener listener)
     {
-        if (mOnChangePathListeners != null && !mOnChangePathListeners.contains(listener)) {
-            mOnChangePathListeners.add(listener);
-        }
-    }
-
-
-    public void removeOnChangePathListener(OnChangePathListener listener)
-    {
-        if (mOnChangePathListeners != null) {
-            mOnChangePathListeners.remove(listener);
-        }
+        mOnChangePathListener = listener;
     }
 
 

@@ -65,6 +65,34 @@ public class SelectLocalResourceDialog
     protected LocalResourceListAdapter mAdapter;
 
 
+    public SelectLocalResourceDialog setTypeMask(int typeMask)
+    {
+        mTypeMask = typeMask;
+        return this;
+    }
+
+
+    public SelectLocalResourceDialog setCanSelectMultiple(boolean can)
+    {
+        mCanSelectMulti = can;
+        return this;
+    }
+
+
+    public SelectLocalResourceDialog setWritable(boolean can)
+    {
+        mCanWrite = can;
+        return this;
+    }
+
+
+    public SelectLocalResourceDialog setPath(File path)
+    {
+        mPath = path;
+        return this;
+    }
+
+
     @Override
     public void onSaveInstanceState(Bundle outState)
     {
@@ -95,38 +123,10 @@ public class SelectLocalResourceDialog
 
         mAdapter = new LocalResourceListAdapter();
         mAdapter.setSingleSelectable(!mCanSelectMulti);
-        mAdapter.addOnChangePathListener(this);
+        mAdapter.setOnChangePathListener(this);
         mAdapter.addOnSelectionChangedListener(this);
 
         runLoader();
-    }
-
-
-    public SelectLocalResourceDialog setTypeMask(int typeMask)
-    {
-        mTypeMask = typeMask;
-        return this;
-    }
-
-
-    public SelectLocalResourceDialog setCanSelectMultiple(boolean can)
-    {
-        mCanSelectMulti = can;
-        return this;
-    }
-
-
-    public SelectLocalResourceDialog setWritable(boolean can)
-    {
-        mCanWrite = can;
-        return this;
-    }
-
-
-    public SelectLocalResourceDialog setPath(File path)
-    {
-        mPath = path;
-        return this;
     }
 
 
@@ -214,7 +214,6 @@ public class SelectLocalResourceDialog
         loader.setTypeMask(mTypeMask);
         loader.setCanSelectMulti(mCanSelectMulti);
         loader.setCanWrite(mCanWrite);
-        mAdapter.addOnChangePathListener(loader);
         return loader;
     }
 
@@ -239,6 +238,7 @@ public class SelectLocalResourceDialog
     public void onChangePath(File path)
     {
         mPath = path;
+        runLoader();
     }
 
 

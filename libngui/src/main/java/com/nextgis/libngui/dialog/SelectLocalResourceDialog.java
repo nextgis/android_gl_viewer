@@ -43,6 +43,7 @@ import com.nextgis.libngui.adapter.LocalResourceListLoader;
 import com.nextgis.libngui.adapter.SimpleDividerItemDecoration;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -52,10 +53,11 @@ public class SelectLocalResourceDialog
                    LocalResourceListAdapter.OnChangePathListener,
                    ListSelectorAdapter.OnSelectionChangedListener
 {
-    protected final static String KEY_MASK          = "mask";
-    protected final static String KEY_CAN_SEL_MULTI = "can_multiselect";
-    protected final static String KEY_WRITABLE      = "can_write";
-    protected final static String KEY_PATH          = "path";
+    protected final static String KEY_PATH           = "path";
+    protected final static String KEY_MASK           = "mask";
+    protected final static String KEY_CAN_SEL_MULTI  = "can_select_multi";
+    protected final static String KEY_WRITABLE       = "can_write";
+    protected final static String KEY_SELECTED_ITEMS = "selected_items";
 
     protected File    mPath;
     protected int     mTypeMask;
@@ -63,6 +65,7 @@ public class SelectLocalResourceDialog
     protected boolean mCanWrite;
 
     protected LocalResourceListAdapter mAdapter;
+    protected ArrayList<String>        mSavedPathList;
 
 
     public SelectLocalResourceDialog setTypeMask(int typeMask)
@@ -97,11 +100,18 @@ public class SelectLocalResourceDialog
     public void onSaveInstanceState(Bundle outState)
     {
         super.onSaveInstanceState(outState);
+
+        mSavedPathList = new ArrayList<>(mAdapter.getSelectedItemCount());
+        List<LocalResourceListItem> items = mAdapter.getSelectedItems();
+        for (LocalResourceListItem item : items) {
+            mSavedPathList.add(item.getFile().getAbsolutePath());
+        }
+
         outState.putSerializable(KEY_PATH, mPath);
         outState.putInt(KEY_MASK, mTypeMask);
         outState.putBoolean(KEY_CAN_SEL_MULTI, mCanSelectMulti);
         outState.putBoolean(KEY_WRITABLE, mCanWrite);
-        // TODO: save selected file names (not indexes!!!)
+        outState.putStringArrayList(KEY_SELECTED_ITEMS, mSavedPathList);
     }
 
 
@@ -118,7 +128,7 @@ public class SelectLocalResourceDialog
             mTypeMask = savedInstanceState.getInt(KEY_MASK);
             mCanSelectMulti = savedInstanceState.getBoolean(KEY_CAN_SEL_MULTI);
             mCanWrite = savedInstanceState.getBoolean(KEY_WRITABLE);
-            // TODO: restore saved selected file names (not indexes!!!)
+            mSavedPathList = savedInstanceState.getStringArrayList(KEY_SELECTED_ITEMS);
         }
 
         mAdapter = new LocalResourceListAdapter();
@@ -224,6 +234,12 @@ public class SelectLocalResourceDialog
             List<LocalResourceListItem> resources)
     {
         mAdapter.setResources(resources);
+
+        if (null != mSavedPathList) {
+            for (String path : mSavedPathList) {
+                mAdapter.setSelection(path, true);
+            }
+        }
     }
 
 
@@ -247,6 +263,6 @@ public class SelectLocalResourceDialog
             int position,
             boolean selection)
     {
-        mButtonPositive.setEnabled(mAdapter.getSelectedItemCount() > 0);
+        mButtonPositive.setEnabled(mAdapter.hasSelectedItems());
     }
 }

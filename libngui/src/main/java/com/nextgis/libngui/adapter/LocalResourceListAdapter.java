@@ -56,7 +56,9 @@ public class LocalResourceListAdapter
     }
 
 
-    public void setPathAdapter(LinearLayout linearLayout, File path)
+    public void setPathAdapter(
+            LinearLayout linearLayout,
+            File path)
     {
         mPathAdapter = new PathAdapter(linearLayout);
         mPathAdapter.setPath(path);
@@ -251,6 +253,19 @@ public class LocalResourceListAdapter
             selRes.add(mResources.get(id));
         }
         return selRes;
+    }
+
+
+    public void setSelection(
+            String path,
+            boolean selection)
+    {
+        for (int i = 0, mResourcesSize = mResources.size(); i < mResourcesSize; i++) {
+            LocalResourceListItem item = mResources.get(i);
+            if (item.getFile().getAbsolutePath().equals(path)) {
+                super.setSelection(i, selection);
+            }
+        }
     }
 
 

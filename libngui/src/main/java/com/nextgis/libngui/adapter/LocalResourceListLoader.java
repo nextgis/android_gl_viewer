@@ -38,7 +38,7 @@ import static com.nextgis.libngui.util.ConstantsUI.*;
 // http://developer.android.com/reference/android/content/AsyncTaskLoader.html
 public class LocalResourceListLoader
         extends AsyncTaskLoader<List<LocalResourceListItem>>
-        implements PathAdapter.OnPathClickListener
+        implements LocalResourceListAdapter.OnChangePathListener
 
 {
     protected File    mPath;
@@ -46,18 +46,15 @@ public class LocalResourceListLoader
     protected boolean mCanSelectMulti;
     protected boolean mCanWrite;
 
-    protected PathAdapter                 mPathAdapter;
     protected List<LocalResourceListItem> mResources;
 
 
     public LocalResourceListLoader(
             Context context,
-            File path,
-            PathAdapter pathAdapter)
+            File path)
     {
         super(context);
         mPath = path;
-        mPathAdapter = pathAdapter;
     }
 
 
@@ -178,9 +175,9 @@ public class LocalResourceListLoader
         }
 
         // Start watching for changes in the resources.
-        if (null != mPathAdapter) {
-            mPathAdapter.setOnPathClickListener(this);
-        }
+        //if (null != mOutChangeEvent) {
+        //    mOutChangeEvent.setOutChangeListener(this);
+        //}
 
         if (takeContentChanged() || mResources == null) {
             // If the data has changed since the last time it was loaded
@@ -232,9 +229,9 @@ public class LocalResourceListLoader
         }
 
         // Stop monitoring for changes.
-        if (null != mPathAdapter) {
-            mPathAdapter.setOnPathClickListener(null);
-        }
+        //if (null != mOutChangeEvent) {
+        //    mOutChangeEvent.setOutChangeListener(null);
+        //}
     }
 
 
@@ -251,7 +248,7 @@ public class LocalResourceListLoader
 
 
     @Override
-    public void onPathClick(File path)
+    public void onChangePath(File path)
     {
         mPath = path;
         // Tell the loader about the change.

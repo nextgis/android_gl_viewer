@@ -36,10 +36,10 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.nextgis.libngui.R;
 import com.nextgis.libngui.activity.NGActivity;
+import com.nextgis.libngui.adapter.ListSelectorAdapter;
 import com.nextgis.libngui.adapter.LocalResourceListAdapter;
 import com.nextgis.libngui.adapter.LocalResourceListItem;
 import com.nextgis.libngui.adapter.LocalResourceListLoader;
-import com.nextgis.libngui.adapter.PathAdapter;
 import com.nextgis.libngui.adapter.SimpleDividerItemDecoration;
 
 import java.io.File;
@@ -48,7 +48,9 @@ import java.util.List;
 
 public class SelectLocalResourceDialog
         extends StyledDialogFragment
-        implements LoaderManager.LoaderCallbacks<List<LocalResourceListItem>>
+        implements LoaderManager.LoaderCallbacks<List<LocalResourceListItem>>,
+                   LocalResourceListAdapter.OnChangePathListener,
+                   ListSelectorAdapter.OnSelectionChangedListener
 {
     protected final static String KEY_MASK          = "mask";
     protected final static String KEY_CAN_SEL_MULTI = "can_multiselect";
@@ -61,7 +63,6 @@ public class SelectLocalResourceDialog
     protected boolean mCanWrite;
 
     protected LocalResourceListAdapter mAdapter;
-    protected PathAdapter              mPathAdapter;
 
 
     @Override
@@ -72,6 +73,7 @@ public class SelectLocalResourceDialog
         outState.putInt(KEY_MASK, mTypeMask);
         outState.putBoolean(KEY_CAN_SEL_MULTI, mCanSelectMulti);
         outState.putBoolean(KEY_WRITABLE, mCanWrite);
+        // TODO: save selected file names (not indexes!!!)
     }
 
 
@@ -83,10 +85,18 @@ public class SelectLocalResourceDialog
 
         super.onCreate(savedInstanceState);
 
+        if (null != savedInstanceState) {
+            mPath = (File) savedInstanceState.getSerializable(KEY_PATH);
+            mTypeMask = savedInstanceState.getInt(KEY_MASK);
+            mCanSelectMulti = savedInstanceState.getBoolean(KEY_CAN_SEL_MULTI);
+            mCanWrite = savedInstanceState.getBoolean(KEY_WRITABLE);
+            // TODO: restore saved selected file names (not indexes!!!)
+        }
+
         mAdapter = new LocalResourceListAdapter();
         mAdapter.setSingleSelectable(!mCanSelectMulti);
-
-        mPathAdapter = new PathAdapter();
+        mAdapter.addOnChangePathListener(this);
+        mAdapter.addOnSelectionChangedListener(this);
 
         runLoader();
     }
@@ -127,13 +137,6 @@ public class SelectLocalResourceDialog
             ViewGroup container,
             Bundle savedInstanceState)
     {
-        if (null != savedInstanceState) {
-            mPath = (File) savedInstanceState.getSerializable(KEY_PATH);
-            mTypeMask = savedInstanceState.getInt(KEY_MASK);
-            mCanSelectMulti = savedInstanceState.getBoolean(KEY_CAN_SEL_MULTI);
-            mCanWrite = savedInstanceState.getBoolean(KEY_WRITABLE);
-        }
-
         View view = inflateThemedLayout(R.layout.dialog_local_resource);
 
         RecyclerView list = (RecyclerView) view.findViewById(R.id.list);
@@ -145,9 +148,7 @@ public class SelectLocalResourceDialog
         list.setAdapter(mAdapter);
 
         LinearLayout pathLayout = (LinearLayout) view.findViewById(R.id.path_view);
-        mPathAdapter.setLinearLayout(pathLayout);
-        mPathAdapter.onUpdate(mPath);
-        mAdapter.setOnResClickListener(mPathAdapter);
+        mAdapter.setPathAdapter(pathLayout, mPath);
 
 
         if (isThemeDark()) {
@@ -185,7 +186,10 @@ public class SelectLocalResourceDialog
             }
         });
 
-        return super.onCreateView(inflater, container, savedInstanceState);
+        View retView = super.onCreateView(inflater, container, savedInstanceState);
+        mButtonPositive.setEnabled(false);
+
+        return retView;
     }
 
 
@@ -206,11 +210,11 @@ public class SelectLocalResourceDialog
             int id,
             Bundle args)
     {
-        LocalResourceListLoader loader =
-                new LocalResourceListLoader(getActivity(), mPath, mPathAdapter);
+        LocalResourceListLoader loader = new LocalResourceListLoader(getActivity(), mPath);
         loader.setTypeMask(mTypeMask);
         loader.setCanSelectMulti(mCanSelectMulti);
         loader.setCanWrite(mCanWrite);
+        mAdapter.addOnChangePathListener(loader);
         return loader;
     }
 
@@ -220,7 +224,6 @@ public class SelectLocalResourceDialog
             Loader<List<LocalResourceListItem>> loader,
             List<LocalResourceListItem> resources)
     {
-        mPath = mPathAdapter.getPath();
         mAdapter.setResources(resources);
     }
 
@@ -229,5 +232,21 @@ public class SelectLocalResourceDialog
     public void onLoaderReset(Loader<List<LocalResourceListItem>> loader)
     {
         mAdapter.setResources(null);
+    }
+
+
+    @Override
+    public void onChangePath(File path)
+    {
+        mPath = path;
+    }
+
+
+    @Override
+    public void onSelectionChanged(
+            int position,
+            boolean selection)
+    {
+        mButtonPositive.setEnabled(mAdapter.getSelectedItemCount() > 0);
     }
 }

@@ -25,12 +25,14 @@ package com.nextgis.libngui.adapter;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.nextgis.libngui.R;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,13 +45,22 @@ import static com.nextgis.libngui.util.ConstantsUI.*;
 public class LocalResourceListAdapter
         extends ListSelectorAdapter
 {
+    protected PathAdapter mPathAdapter;
     protected List<LocalResourceListItem> mResources;
-    protected OnResClickListener          mOnResClickListener;
+    protected List<OnChangePathListener> mOnChangePathListeners;
 
 
     public LocalResourceListAdapter()
     {
         super();
+        mOnChangePathListeners = new ArrayList<>();
+    }
+
+
+    public void setPathAdapter(LinearLayout linearLayout, File path)
+    {
+        mPathAdapter = new PathAdapter(linearLayout);
+        mPathAdapter.setPath(path);
     }
 
 
@@ -71,9 +82,9 @@ public class LocalResourceListAdapter
             public void onItemClick(int position)
             {
                 LocalResourceListItem item = mResources.get(position);
-
-                if (null != mOnResClickListener) {
-                    mOnResClickListener.onResClick(item);
+                int type = item.getType();
+                if (FILETYPE_PARENT == type || FILETYPE_FOLDER == type) {
+                    setCurrentPath(item.getFile());
                 }
             }
         });
@@ -82,6 +93,20 @@ public class LocalResourceListAdapter
 
         return new LocalResourceListAdapter.ViewHolder(
                 itemView, mSingleSelectable, mOnItemClickListener, mOnItemLongClickListener);
+    }
+
+
+    protected void setCurrentPath(File path)
+    {
+        if (null != mPathAdapter) {
+            mPathAdapter.setPath(path);
+        }
+
+        if (null != mOnChangePathListeners) {
+            for (OnChangePathListener listener : mOnChangePathListeners) {
+                listener.onChangePath(path);
+            }
+        }
     }
 
 
@@ -232,14 +257,79 @@ public class LocalResourceListAdapter
     }
 
 
-    public void setOnResClickListener(OnResClickListener listener)
+    public void addOnChangePathListener(OnChangePathListener listener)
     {
-        mOnResClickListener = listener;
+        if (mOnChangePathListeners != null && !mOnChangePathListeners.contains(listener)) {
+            mOnChangePathListeners.add(listener);
+        }
     }
 
 
-    public interface OnResClickListener
+    public void removeOnChangePathListener(OnChangePathListener listener)
     {
-        void onResClick(LocalResourceListItem item);
+        if (mOnChangePathListeners != null) {
+            mOnChangePathListeners.remove(listener);
+        }
+    }
+
+
+    public interface OnChangePathListener
+    {
+        void onChangePath(File path);
+    }
+
+
+    /**
+     * A path view class. the path is a resources names divide by arrows in head of dialog. If user
+     * click on name, the dialog follow the specified path.
+     */
+    public class PathAdapter
+    {
+        protected LinearLayout mLinearLayout;
+        protected Context      mContext;
+
+
+        public PathAdapter(LinearLayout linearLayout)
+        {
+            mLinearLayout = linearLayout;
+            mContext = linearLayout.getContext();
+        }
+
+
+        public void setPath(File path)
+        {
+            if (null == mLinearLayout) {
+                return;
+            }
+            mLinearLayout.removeAllViewsInLayout();
+
+            File parent = path;
+            while (null != parent) {
+                final File parentPath = parent;
+
+                LayoutInflater inflater = LayoutInflater.from(mContext);
+
+                TextView nameView =
+                        (TextView) inflater.inflate(R.layout.item_path_name, mLinearLayout, false);
+                nameView.setText(parent.getName());
+                nameView.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        setCurrentPath(parentPath);
+                    }
+                });
+                mLinearLayout.addView(nameView, 0);
+
+                parent = parent.getParentFile();
+                if (null != parent) {
+                    ImageView imageView =
+                            (ImageView) inflater.inflate(R.layout.item_path_icon, mLinearLayout,
+                                                         false);
+                    mLinearLayout.addView(imageView, 0);
+                }
+            }
+        }
     }
 }

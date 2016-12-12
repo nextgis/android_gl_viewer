@@ -1,12 +1,41 @@
-<menu tools:context="com.nextgis.glviewer.MainActivity"
-      xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto"
-      xmlns:tools="http://schemas.android.com/tools"
+<menu
+        tools:context="com.nextgis.glviewer.MainActivity"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         >
+
+<!--
+    <item
+            android:id="@+id/action_select_resource"
+            android:orderInCategory="100"
+            android:title="@string/select_resource"
+            app:showAsAction="never"
+            />
+-->
+    <item
+            android:id="@+id/action_select_file"
+            android:orderInCategory="100"
+            android:title="@string/select_file"
+            app:showAsAction="never"
+            />
+    <item
+            android:id="@+id/action_select_files"
+            android:orderInCategory="100"
+            android:title="@string/select_files"
+            app:showAsAction="never"
+            />
+    <item
+            android:id="@+id/action_select_folder"
+            android:orderInCategory="100"
+            android:title="@string/select_folder"
+            app:showAsAction="never"
+            />
     <item
             android:id="@+id/action_settings"
             android:orderInCategory="100"
             android:title="@string/action_settings"
             app:showAsAction="never"
             />
+
 </menu>

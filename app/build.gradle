@@ -54,8 +54,8 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile project(':libngui')
-    compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.android.support:design:25.0.1'
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.android.support:design:25.1.0'
 //    compile 'testfairy:testfairy-android-sdk:1.+@aar'
     testCompile 'junit:junit:4.12'
 }

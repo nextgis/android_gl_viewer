@@ -26,8 +26,9 @@
     <string name="action_settings">Settings</string>
     <string name="draw_time">Rendering time (s):</string>
     <string name="feature_count">Number of features:</string>
-    <string name="select_resource">Select resource</string>
+    <string name="open_file">Open file</string>
     <string name="select_file">Select file</string>
-    <string name="select_files">Select files</string>
+    <string name="select_files">Select multi files</string>
     <string name="select_folder">Select folder</string>
+    <string name="select_folders">Select multi folders</string>
 </resources>

@@ -68,7 +68,7 @@ public class DataStore
     {
         closeMap();
         mMapId = Api.ngsMapCreate(DEFAULT_MAP_NAME, "test gl map", DEFAULT_EPSG, DEFAULT_MIN_X,
-                                  DEFAULT_MIN_Y, DEFAULT_MAX_X, DEFAULT_MAX_Y);
+                DEFAULT_MIN_Y, DEFAULT_MAX_X, DEFAULT_MAX_Y);
         return 0 != mMapId;
     }
 
@@ -102,22 +102,27 @@ public class DataStore
     }
 
 
-    public void loadMap()
+    public void loadMap(String path)
             throws IOException
     {
-//        File sceneDir = new File(mMapPath, "scenes");
-//        File sceneFile = new File(sceneDir, "scenes.shp");
-        File sceneDir = new File(mMapPath, "orbview3-catalog-shp");
-        File sceneFile = new File(sceneDir, "orbview3_catalog.shp");
+// for debug
+//        File shapeDir = new File(mMapPath, "scenes");
+//        File shapeFileTest = new File(shapeDir, "scenes.shp");
+//        File shapeDir = new File(mMapPath, "orbview3-catalog-shp");
+//        File shapeFileTest = new File(shapeDir, "orbview3_catalog.shp");
+//        if (null == path) {
+//            path = shapeFileTest.getAbsolutePath();
+//        }
 
-        if (!sceneFile.exists()) {
+        File shapeFile = new File(path);
+        if (!shapeFile.exists()) {
             String error = "File orbview3_catalog.shp is not exist.";
             Log.d(Constants.TAG, error);
             throw new IOException(error);
         }
 
-        String sceneFilePath = sceneFile.getPath();
-        String filenameArray[] = sceneFile.getName().split("\\.");
+        String sceneFilePath = shapeFile.getPath();
+        String filenameArray[] = shapeFile.getName().split("\\.");
         String sceneFileName = filenameArray[0];
 
         String[] options = {"LOAD_OP=COPY", "FEATURES_SKIP=EMPTY_GEOMETRY"};

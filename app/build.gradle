@@ -27,7 +27,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.nextgis.glviewer"
 //        minSdkVersion 9
@@ -162,12 +162,14 @@ android {
         }
     }
 
+    def String srcJavaDir = "${rootDir}/libngstore/bindings/java"
     def String genSrcJavaDir = "${projectDir}/.externalNativeBuild/cmake/${buildConfig}" +
             "/${cmAndroidAbis.get(0)}/libngstoreapi/libngstore/bindings"
 
     task cmCopyJSources(type: Copy) {
         description "Copy java files."
 
+        from(new File(srcJavaDir)) { include "*.java" }
         from(new File(genSrcJavaDir)) { include "*.java" }
         into new File("src/main/java/com/nextgis/store/bindings")
     }

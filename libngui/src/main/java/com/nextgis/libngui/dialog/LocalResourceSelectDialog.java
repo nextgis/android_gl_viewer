@@ -47,7 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SelectLocalResourceDialog
+public class LocalResourceSelectDialog
         extends StyledDialogFragment
         implements LoaderManager.LoaderCallbacks<List<LocalResourceListItem>>,
                    LocalResourceListAdapter.OnChangePathListener,
@@ -68,28 +68,28 @@ public class SelectLocalResourceDialog
     protected ArrayList<String>        mSavedPathList;
 
 
-    public SelectLocalResourceDialog setTypeMask(int typeMask)
+    public LocalResourceSelectDialog setTypeMask(int typeMask)
     {
         mTypeMask = typeMask;
         return this;
     }
 
 
-    public SelectLocalResourceDialog setCanSelectMultiple(boolean can)
+    public LocalResourceSelectDialog setCanSelectMultiple(boolean can)
     {
         mCanSelectMulti = can;
         return this;
     }
 
 
-    public SelectLocalResourceDialog setWritable(boolean can)
+    public LocalResourceSelectDialog setWritable(boolean can)
     {
         mCanWrite = can;
         return this;
     }
 
 
-    public SelectLocalResourceDialog setPath(File path)
+    public LocalResourceSelectDialog setPath(File path)
     {
         mPath = path;
         return this;

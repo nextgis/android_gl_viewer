@@ -24,11 +24,13 @@
 package com.nextgis.glviewer;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+import com.nextgis.dialog.LocalResourceNativeSelectDialog;
 import com.nextgis.libngui.activity.NGActivity;
-import com.nextgis.libngui.dialog.SelectLocalResourceDialog;
 import com.nextgis.libngui.util.ConstantsUI;
 
 import java.io.File;
@@ -37,7 +39,8 @@ import java.io.File;
 public class MainActivity
         extends NGActivity
 {
-    protected Toolbar mToolbar;
+    protected Toolbar     mToolbar;
+    protected MapFragment mMapFragment;
 
 
     @Override
@@ -49,6 +52,9 @@ public class MainActivity
 
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mToolbar);
+
+        FragmentManager fm = getSupportFragmentManager();
+        mMapFragment = (MapFragment) fm.findFragmentById(R.id.map_fragment);
     }
 
 
@@ -65,20 +71,24 @@ public class MainActivity
     public boolean onOptionsItemSelected(MenuItem item)
     {
         switch (item.getItemId()) {
-//            case R.id.action_select_resource:
-//                selectResource();
-//                return true;
+            case R.id.action_open_file:
+                openFile();
+                return true;
 
             case R.id.action_select_file:
-                selectFilesAndFolder(1);
+                selectFilesAndFolderNative(1);
                 return true;
 
             case R.id.action_select_files:
-                selectFilesAndFolder(2);
+                selectFilesAndFolderNative(2);
                 return true;
 
             case R.id.action_select_folder:
-                selectFilesAndFolder(3);
+                selectFilesAndFolderNative(3);
+                return true;
+
+            case R.id.action_select_folders:
+                selectFilesAndFolderNative(4);
                 return true;
 
             case R.id.action_settings:
@@ -89,33 +99,52 @@ public class MainActivity
     }
 
 
-    protected void selectResource()
+    protected void openFile()
     {
-        SelectLocalResourceDialog dialog = new SelectLocalResourceDialog();
-        File path = new File("/sdcard");
-        dialog.setPath(path);
+        File path = getExternalFilesDir("");
+
+        if (null == path) {
+            Toast.makeText(this, "External storage is not mounted", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        LocalResourceNativeSelectDialog dialog = new LocalResourceNativeSelectDialog();
+        dialog.setPath(path.getAbsolutePath());
+        dialog.setItemTypeMask(ConstantsUI.FILETYPE_SHP);
+        dialog.setCanSelectMultiple(false);
+        dialog.setOnSelectionListener(mMapFragment);
         dialog.show(getSupportFragmentManager(), Constants.FRAGMENT_SELECT_RESOURCE);
     }
 
-    protected void selectFilesAndFolder(int type)
+
+    protected void selectFilesAndFolderNative(int type)
     {
-        SelectLocalResourceDialog dialog = new SelectLocalResourceDialog();
-        File path = new File("/sdcard");
-        dialog.setPath(path);
+        File path = getExternalFilesDir("");
+
+        if (null == path) {
+            Toast.makeText(this, "External storage is not mounted", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        LocalResourceNativeSelectDialog dialog = new LocalResourceNativeSelectDialog();
+        dialog.setPath(path.getAbsolutePath());
 
         switch (type) {
             case 1:
-                dialog.setTypeMask(ConstantsUI.FILETYPE_ALL_FILE_TYPES);
+                dialog.setItemTypeMask(ConstantsUI.FILETYPE_ALL_FILE_TYPES);
                 dialog.setCanSelectMultiple(false);
                 break;
             case 2:
-                dialog.setTypeMask(ConstantsUI.FILETYPE_ALL_FILE_TYPES);
+                dialog.setItemTypeMask(ConstantsUI.FILETYPE_ALL_FILE_TYPES);
                 dialog.setCanSelectMultiple(true);
                 break;
             case 3:
-                dialog.setTypeMask(ConstantsUI.FILETYPE_FOLDER);
+                dialog.setItemTypeMask(ConstantsUI.FILETYPE_FOLDER);
                 dialog.setCanSelectMultiple(false);
-                dialog.setWritable(true);
+                break;
+            case 4:
+                dialog.setItemTypeMask(ConstantsUI.FILETYPE_FOLDER);
+                dialog.setCanSelectMultiple(true);
                 break;
         }
 

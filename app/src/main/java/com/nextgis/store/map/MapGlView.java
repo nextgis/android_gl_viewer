@@ -153,12 +153,18 @@ public class MapGlView
         mMapDrawing = new MapDrawing(mApp.getMapPath());
 
         if (!mMapDrawing.openMap()) {
-            mMapDrawing.createMap();
-            try {
-                mMapDrawing.loadMap();
-            } catch (IOException e) {
-                Toast.makeText(mApp, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-            }
+//            loadFile(null); // for debug
+        }
+    }
+
+
+    public void loadFile(String path)
+    {
+        mMapDrawing.createMap();
+        try {
+            mMapDrawing.loadMap(path);
+        } catch (IOException e) {
+            Toast.makeText(mApp, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
     }
 

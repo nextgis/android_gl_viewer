@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.nextgis.dialog.LocalResourceNativeSelectDialog;
 import com.nextgis.store.map.MapDrawing;
 import com.nextgis.store.map.MapGlView;
 
@@ -42,8 +43,8 @@ import java.util.Locale;
 public class MapFragment
         extends Fragment
         implements MapDrawing.OnDrawTimeChangeListener,
-                   MapDrawing.OnFeatureCountChangeListener
-
+                   MapDrawing.OnFeatureCountChangeListener,
+                   LocalResourceNativeSelectDialog.OnSelectionListener
 {
     protected static final String WAIT_STRING = "*****";
 
@@ -177,5 +178,12 @@ public class MapFragment
 
         String countString = null != mCountFormat ? mCountFormat.format(featureCount) : "" + featureCount;
         mFeatureCountView.setText(" " + countString + " ");
+    }
+
+
+    @Override
+    public void onSelection(String path)
+    {
+        mMapGlView.loadFile(path);
     }
 }

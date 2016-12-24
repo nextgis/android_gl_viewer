@@ -26,4 +26,9 @@
     <string name="action_settings">Настройки</string>
     <string name="draw_time">Время прорисовки (сек): </string>
     <string name="feature_count">Количество объектов: </string>
+    <string name="open_file">Открыть файл</string>
+    <string name="select_file">Select file</string>
+    <string name="select_files">Select multi files</string>
+    <string name="select_folder">Select folder</string>
+    <string name="select_folders">Select multi folders</string>
 </resources>

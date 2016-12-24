@@ -28,6 +28,7 @@
     <string name="formbuilder_file">FormBuilder file</string>
     <string name="geojson_file">GeoJSON file</string>
     <string name="zip_file">ZIP file</string>
+    <string name="shape_file">Shape file</string>
     <string name="unknown_file">Unknown file</string>
     <string name="up">Up</string>
     <string name="up_dots">..</string>

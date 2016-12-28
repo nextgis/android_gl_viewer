@@ -31,6 +31,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 import com.nextgis.dialog.LocalResourceNativeSelectDialog;
 import com.nextgis.libngui.activity.NGActivity;
+import com.nextgis.libngui.dialog.LocalResourceSelectDialog;
 import com.nextgis.libngui.util.ConstantsUI;
 
 import java.io.File;
@@ -108,12 +109,12 @@ public class MainActivity
             return;
         }
 
-//        LocalResourceSelectDialog dialog = new LocalResourceSelectDialog();
-//        dialog.setPath(path);
-//        dialog.setTypeMask(ConstantsUI.FILETYPE_SHP);
-        LocalResourceNativeSelectDialog dialog = new LocalResourceNativeSelectDialog();
-        dialog.setPath(path.getAbsolutePath());
-        dialog.setItemTypeMask(ConstantsUI.FILETYPE_SHP);
+        LocalResourceSelectDialog dialog = new LocalResourceSelectDialog();
+        dialog.setPath(path);
+        dialog.setTypeMask(ConstantsUI.FILETYPE_SHP);
+//        LocalResourceNativeSelectDialog dialog = new LocalResourceNativeSelectDialog();
+//        dialog.setPath(path.getAbsolutePath());
+//        dialog.setItemTypeMask(ConstantsUI.FILETYPE_SHP);
         dialog.setCanSelectMultiple(false);
         dialog.setOnSelectionListener(mMapFragment);
         dialog.show(getSupportFragmentManager(), Constants.FRAGMENT_SELECT_RESOURCE);

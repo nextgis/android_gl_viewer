@@ -31,7 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import com.nextgis.dialog.LocalResourceNativeSelectDialog;
+import com.nextgis.libngui.dialog.LocalResourceSelectDialog;
 import com.nextgis.store.map.MapDrawing;
 import com.nextgis.store.map.MapGlView;
 
@@ -44,7 +44,7 @@ public class MapFragment
         extends Fragment
         implements MapDrawing.OnDrawTimeChangeListener,
                    MapDrawing.OnFeatureCountChangeListener,
-                   LocalResourceNativeSelectDialog.OnSelectionListener
+                   LocalResourceSelectDialog.OnSelectionListener
 {
     protected static final String WAIT_STRING = "*****";
 

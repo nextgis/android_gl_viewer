@@ -153,6 +153,7 @@ public class MapGlView
         mMapDrawing = new MapDrawing(mApp.getMapPath());
 
         if (!mMapDrawing.openMap()) {
+            mMapDrawing.createMap();
 //            loadFile(null); // for debug
         }
     }
@@ -160,7 +161,6 @@ public class MapGlView
 
     public void loadFile(String path)
     {
-        mMapDrawing.createMap();
         try {
             mMapDrawing.loadMap(path);
         } catch (IOException e) {

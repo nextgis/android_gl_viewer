@@ -66,6 +66,7 @@ public class LocalResourceSelectDialog
 
     protected LocalResourceListAdapter mAdapter;
     protected ArrayList<String>        mSavedPathList;
+    protected OnSelectionListener      mOnSelectionListener;
 
 
     public LocalResourceSelectDialog setTypeMask(int typeMask)
@@ -184,6 +185,11 @@ public class LocalResourceSelectDialog
                 }
                 Toast.makeText(mContext, "Selected items:\n" + sb.toString(), Toast.LENGTH_LONG)
                         .show();
+
+                if (null != mOnSelectionListener) {
+                    String path = items.get(0).getFile().getAbsolutePath();
+                    mOnSelectionListener.onSelection(path);
+                }
             }
         });
 
@@ -264,5 +270,17 @@ public class LocalResourceSelectDialog
             boolean selection)
     {
         mButtonPositive.setEnabled(mAdapter.hasSelectedItems());
+    }
+
+
+    public void setOnSelectionListener(OnSelectionListener onSelectionListener)
+    {
+        mOnSelectionListener = onSelectionListener;
+    }
+
+
+    public interface OnSelectionListener
+    {
+        void onSelection(String path);
     }
 }

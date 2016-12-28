@@ -122,6 +122,9 @@ public class LocalResourceListItem
         if (file.getName().endsWith(".geojson")) {
             return FILETYPE_GEOJSON;
         }
+        if (file.getName().endsWith(".shp")) {
+            return FILETYPE_SHP;
+        }
         return FILETYPE_UNKNOWN;
     }
 

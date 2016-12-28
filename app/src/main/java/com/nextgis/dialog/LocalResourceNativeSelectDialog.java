@@ -196,8 +196,8 @@ public class LocalResourceNativeSelectDialog
                 Toast.makeText(mContext, "Selected items:\n" + sb.toString(), Toast.LENGTH_LONG)
                         .show();
 
-                String path = container.getItemPath(ids.get(0));
                 if (null != mOnSelectionListener) {
+                    String path = container.getItemPath(ids.get(0));
                     mOnSelectionListener.onSelection(path);
                 }
             }

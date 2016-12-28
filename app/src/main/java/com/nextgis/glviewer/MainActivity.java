@@ -108,6 +108,9 @@ public class MainActivity
             return;
         }
 
+//        LocalResourceSelectDialog dialog = new LocalResourceSelectDialog();
+//        dialog.setPath(path);
+//        dialog.setTypeMask(ConstantsUI.FILETYPE_SHP);
         LocalResourceNativeSelectDialog dialog = new LocalResourceNativeSelectDialog();
         dialog.setPath(path.getAbsolutePath());
         dialog.setItemTypeMask(ConstantsUI.FILETYPE_SHP);

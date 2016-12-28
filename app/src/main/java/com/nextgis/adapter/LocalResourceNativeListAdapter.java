@@ -188,7 +188,7 @@ public class LocalResourceNativeListAdapter
                 viewHolder.mFileDesc.setText(context.getString(R.string.geojson_file));
                 break;
             case FILETYPE_SHP:
-                viewHolder.mFileIcon.setImageDrawable(
+                viewHolder.mFileIcon.setImageDrawable( // TODO: icon for shp file
                         ContextCompat.getDrawable(context, R.drawable.ic_geojson));
                 viewHolder.mFileName.setText(item.getFullName());
                 viewHolder.mFileDesc.setText(context.getString(R.string.shape_file));

@@ -50,14 +50,24 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
     compile project(':libngui')
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'com.android.support:design:25.1.0'
+
+    // Testfairy SDK
 //    compile 'testfairy:testfairy-android-sdk:1.+@aar'
+
+    // JUnit 4 framework
     testCompile 'junit:junit:4.12'
+
+    // Dependencies from the main compile block for the test app
+    androidTestCompile 'com.android.support:appcompat-v7:25.1.0'
+    androidTestCompile 'com.android.support:design:25.1.0'
+
+    // Espresso tests (API 10+)
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
 }
 
 

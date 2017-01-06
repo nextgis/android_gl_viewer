@@ -38,4 +38,6 @@ public interface ConstantsUI
 
     int FILETYPE_ALL_FILE_TYPES =
             FILETYPE_FB | FILETYPE_GEOJSON | FILETYPE_ZIP | FILETYPE_SHP | FILETYPE_UNKNOWN;
+
+    String FRAGMENT_SELECT_RESOURCE = "select_resource";
 }

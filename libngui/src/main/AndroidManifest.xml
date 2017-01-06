@@ -21,12 +21,21 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.nextgis.libngui">
+<manifest
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.nextgis.libngui"
+        >
 
     <application
-        android:allowBackup="true"
-        android:label="@string/app_name">
+            android:allowBackup="true"
+            >
+        <!--android:label="@string/app_name"-->
+
+        <activity
+                android:label="@string/app_name"
+                android:name=".activity.NGActivity"
+                >
+        </activity>
 
     </application>
 </manifest>

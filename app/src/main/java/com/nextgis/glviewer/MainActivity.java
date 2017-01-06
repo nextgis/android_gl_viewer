@@ -117,7 +117,7 @@ public class MainActivity
 //        dialog.setItemTypeMask(ConstantsUI.FILETYPE_SHP);
         dialog.setCanSelectMultiple(false);
         dialog.setOnSelectionListener(mMapFragment);
-        dialog.show(getSupportFragmentManager(), Constants.FRAGMENT_SELECT_RESOURCE);
+        dialog.show(getSupportFragmentManager(), ConstantsUI.FRAGMENT_SELECT_RESOURCE);
     }
 
 
@@ -152,6 +152,6 @@ public class MainActivity
                 break;
         }
 
-        dialog.show(getSupportFragmentManager(), Constants.FRAGMENT_SELECT_RESOURCE);
+        dialog.show(getSupportFragmentManager(), ConstantsUI.FRAGMENT_SELECT_RESOURCE);
     }
 }
